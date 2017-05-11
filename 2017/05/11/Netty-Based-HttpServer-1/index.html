@@ -41,7 +41,7 @@
 <link href="/css/main.css?v=0.5.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="mysql,多表查询" />
+  <meta name="keywords" content="netty,httpserver,java,高性能" />
 
 
 
@@ -58,19 +58,16 @@
 
 
 
-<meta name="description" content="关于mysql的多表查询优化，之前一直没有注意，最近写的一个自认为还OK的sql在生产环境中出现了问题，在此记录一下。">
+<meta name="description" content="接下来几篇将介绍本次项目实现的基于netty的高性能httpserver，特点如下：1. 基于Netty的高性能、高可靠性的特性，可以满足大多数业务场景的并发需求；2. 业务与底层解耦，开发人员只需关心业务细节即可；3. 极简的使用方式，注解式编程。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Mysql-多表查询优化">
-<meta property="og:url" content="http://cqzong.com/2016/02/16/Mysql-多表查询优化/index.html">
+<meta property="og:title" content="基于Netty实现的httpserver实现（一）">
+<meta property="og:url" content="http://cqzong.com/2017/05/11/Netty-Based-HttpServer-1/index.html">
 <meta property="og:site_name" content="ChuaqiQi's Blogs">
-<meta property="og:description" content="关于mysql的多表查询优化，之前一直没有注意，最近写的一个自认为还OK的sql在生产环境中出现了问题，在此记录一下。">
-<meta property="og:image" content="http://cl.ly/1o2q2R2v0Y0D/Image%202016-02-16%20at%2010.56.45.png">
-<meta property="og:image" content="http://cl.ly/2L0p3W070n2K/Image%202016-02-16%20at%2011.23.03.png">
-<meta property="og:image" content="http://cl.ly/2w2V2R2u0Q1j/Image%202016-02-16%20at%2011.27.44.png">
-<meta property="og:updated_time" content="2016-02-16T03:48:32.000Z">
+<meta property="og:description" content="接下来几篇将介绍本次项目实现的基于netty的高性能httpserver，特点如下：1. 基于Netty的高性能、高可靠性的特性，可以满足大多数业务场景的并发需求；2. 业务与底层解耦，开发人员只需关心业务细节即可；3. 极简的使用方式，注解式编程。">
+<meta property="og:updated_time" content="2016-02-19T07:00:36.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Mysql-多表查询优化">
-<meta name="twitter:description" content="关于mysql的多表查询优化，之前一直没有注意，最近写的一个自认为还OK的sql在生产环境中出现了问题，在此记录一下。">
+<meta name="twitter:title" content="基于Netty实现的httpserver实现（一）">
+<meta name="twitter:description" content="接下来几篇将介绍本次项目实现的基于netty的高性能httpserver，特点如下：1. 基于Netty的高性能、高可靠性的特性，可以满足大多数业务场景的并发需求；2. 业务与底层解耦，开发人员只需关心业务细节即可；3. 极简的使用方式，注解式编程。">
 
 
 
@@ -88,7 +85,7 @@
   };
 </script>
 
-  <title> Mysql-多表查询优化 | ChuaqiQi's Blogs </title>
+  <title> 基于Netty实现的httpserver实现（一） | ChuaqiQi's Blogs </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -266,7 +263,7 @@
             
             
               
-                Mysql-多表查询优化
+                基于Netty实现的httpserver实现（一）
               
             
           </h1>
@@ -278,8 +275,8 @@
               <i class="fa fa-calendar-o"></i>
             </span>
             <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-02-16T11:48:32+08:00" content="2016-02-16">
-              2016-02-16
+            <time itemprop="dateCreated" datetime="2017-05-11T11:28:06+08:00" content="2017-05-11">
+              2017-05-11
             </time>
           </span>
 
@@ -308,8 +305,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/02/16/Mysql-多表查询优化/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/02/16/Mysql-多表查询优化/" itemprop="commentsCount"></span>
+                <a href="/2017/05/11/Netty-Based-HttpServer-1/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/05/11/Netty-Based-HttpServer-1/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -330,25 +327,17 @@
       
 
       
-        <p>猴年开年第一篇，mark一下。</p>
-<p>关于mysql的多表查询优化，之前一直没有注意，最近写的一个自认为还OK的sql在生产环境中出现了问题，在此记录一下。</p>
-<h3 id="u6392_u67E5"><a href="#u6392_u67E5" class="headerlink" title="排查"></a>排查</h3><p>机器的CPU占用100%，查看业务日志，在执行问题sql的时候抛出异常：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.sql.SQLException: An attempt by a client to checkout a Connection has timed out.</span><br></pre></td></tr></table></figure></p>
-<p>这个库连接肯定没问题，因为别的业务也在用这个库，所以定位这条sql写的有问题。<br>问题原因暂且放在一边，先把业务恢复了。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show processlist;</span><br></pre></td></tr></table></figure></p>
-<p>列出所有正在运行的线程信息，发现这条问题sql卡在了 <strong>Sending data</strong> 状态：</p>
-<p><img src="http://cl.ly/1o2q2R2v0Y0D/Image%202016-02-16%20at%2010.56.45.png" alt="image1"></p>
-<p>直接执行 <strong>kill 线程号</strong>，杀掉这个线程，CPU立马就降下来了。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">kill</span> <span class="number">256397</span>;</span><br></pre></td></tr></table></figure></p>
-<p>值得注意的是，<strong>Sending data</strong> 状态官方解释是:正在处理Select查询的记录，同时正在把结果发送给客户端。如果卡在这个状态这个可能有两种情况：</p>
-<ol>
-<li>卡在了查询状态，也就是mysql正在收集数据；</li>
-<li>卡在了发送数据给客户端状态，这个可能是因为查询的数据量太大，堵塞了网络IO</li>
-</ol>
-<h3 id="u5206_u6790_26amp_3B_u89E3_u51B3"><a href="#u5206_u6790_26amp_3B_u89E3_u51B3" class="headerlink" title="分析&amp;解决"></a>分析&amp;解决</h3><p>这个sql出现问题的原因暂时还无解，因为 <strong>explain</strong> 之后的分析结果看，这个sql还是说得过去的，测试环境跑的也没问题，但是生产环境就有问题，有空向大拿请教一下。</p>
-<p><img src="http://cl.ly/2L0p3W070n2K/Image%202016-02-16%20at%2011.23.03.png" alt="image2"></p>
-<p>解决思路是使用子查询，尽可能的在子查询中缩小数据查询范围，但是优化后的sql <strong>explain</strong>之后看并没有改善太多，很奇怪：</p>
-<p><img src="http://cl.ly/2w2V2R2u0Q1j/Image%202016-02-16%20at%2011.27.44.png" alt="image3"></p>
-<p>以下是优化前和优化后的sql，请有经验的同学不吝赐教，感谢！</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">  fl.id         AS `fileLogId`,</span><br><span class="line">  fl.MD5        AS `smallPortrait`,</span><br><span class="line">  fl.userId     AS `userId`,</span><br><span class="line">  p.id          AS `portraitId`,</span><br><span class="line">  fl.updateTime AS `updateTime`</span><br><span class="line">FROM `CU_Log`.`UP_FileLog` fl,</span><br><span class="line">  `CU`.`UP_Portrait` p,</span><br><span class="line">  `CU`.`UP_User` u</span><br><span class="line">WHERE fl.userId = p.userId</span><br><span class="line">    AND fl.userId = u.userId</span><br><span class="line">    AND u.gender = <span class="number">2</span></span><br><span class="line">    AND fl.`userId` &gt; <span class="number">10000000</span></span><br><span class="line">    AND fl.`userId` &lt; <span class="number">80000000</span></span><br><span class="line">    AND fl.`MD5` &lt;&gt; <span class="string">'94F46FECE6D8611C'</span></span><br><span class="line">    AND fl.fileType = <span class="number">2</span></span><br><span class="line">    AND fl.actionType = <span class="number">1</span></span><br><span class="line">    AND fl.MD5 = p.smallPortrait</span><br><span class="line">    AND p.`order` = (SELECT MIN(`order`) FROM `CU`.`UP_Portrait` WHERE userId = p.userId)</span><br><span class="line">    AND fl.`MD5` NOT IN(SELECT `md5` FROM `CU`.`CU_BlackFile`)</span><br><span class="line">    AND fl.`id` NOT IN(SELECT `fileLogId` FROM `CustomerSystem`.`CheckAvatarLog`)</span><br><span class="line">    AND p.id NOT IN(SELECT `portraitId` FROM `CustomerSystem`.`CheckAvatarLog`)</span><br><span class="line">GROUP BY p.id</span><br><span class="line">ORDER BY `updateTime` DESC</span><br><span class="line">LIMIT <span class="number">8</span>;</span><br></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">SELECT</span><br><span class="line">  f.fileLogId  AS `fileLogId`,</span><br><span class="line">  f.MD5        AS `smallPortrait`,</span><br><span class="line">  u.userId     AS `userId`,</span><br><span class="line">  f.portraitId AS `portraitId`,</span><br><span class="line">  f.updateTime AS `updateTime`</span><br><span class="line">FROM (SELECT</span><br><span class="line">        fl.`id`         AS `fileLogId`,</span><br><span class="line">        fl.`MD5`,</span><br><span class="line">        up.id           AS portraitId,</span><br><span class="line">        fl.`updateTime`,</span><br><span class="line">        fl.`userId`</span><br><span class="line">      FROM `CU_Log`.`UP_FileLog` fl,</span><br><span class="line">        `CU`.`UP_Portrait` up</span><br><span class="line">      WHERE fl.`userId` &gt; <span class="number">10000000</span></span><br><span class="line">          AND fl.`userId` &lt; <span class="number">80000000</span></span><br><span class="line">          AND fl.`actionType` = <span class="number">1</span></span><br><span class="line">          AND fl.`fileType` = <span class="number">2</span></span><br><span class="line">          AND fl.`MD5` &lt;&gt; <span class="string">'94F46FECE6D8611C'</span></span><br><span class="line">          AND fl.`userId` IN(SELECT u.`userId` FROM `CU`.`UP_User` u WHERE u.`userId` = fl.`userId` AND u.`gender` = <span class="number">2</span>)</span><br><span class="line">          AND fl.`MD5` NOT IN(SELECT bf.`md5` FROM `CU`.`CU_BlackFile` bf WHERE bf.`md5` = fl.`MD5`)</span><br><span class="line">          AND fl.userId = up.userId</span><br><span class="line">          AND fl.MD5 = up.smallPortrait</span><br><span class="line">          AND up.`order` = (SELECT MIN(`order`) FROM `CU`.`UP_Portrait` WHERE userId = up.userId)</span><br><span class="line">      GROUP BY fl.`userId`</span><br><span class="line">      HAVING `fileLogId` NOT IN(SELECT cl.`fileLogId` FROM `CustomerSystem`.`CheckAvatarLog` cl WHERE cl.`fileLogId` = `fileLogId`)</span><br><span class="line">      ORDER BY `updateTime` DESC</span><br><span class="line">      LIMIT <span class="number">8</span> ) f,</span><br><span class="line">  `CU`.`UP_User` u</span><br><span class="line">WHERE f.`userId` = u.`userId`</span><br></pre></td></tr></table></figure>
+        <p>目前http协议是许多App和服务端通信的首选协议，那么对于服务端来说，一个好的httpserver一定是必不可少的了。开源的嵌入式httpServer有很多，就连JDK都自带一个轻量的httpserver，我们项目最初选择的就是JDK自带的httpserver。</p>
+<p>从代码结构来看JDK自带的httpserver真的是非常轻量，但是好处越大却缺点也越大，随着系统复杂度的提升，这种轻量的组件越来越力不从心，对开发人员相当不友好，业务与底层耦合太强，代码复杂度越来越高的同时，性能越来越差。</p>
+<p>最近生产环境这个server屡次出问题，已经到了没法忍受的地步，而且相对其他httpserver来说，性能并没有很高，因此改造httpserver提升日程。</p>
+<p>接下来几篇将介绍本次项目实现的基于netty的高性能httpserver，特点如下：</p>
+<ul>
+<li>基于Netty的高性能、高可靠性的特性，可以满足大多数业务场景的并发需求；</li>
+<li>业务与底层解耦，开发人员只需关心业务细节即可；</li>
+<li>极简的使用方式，注解式编程。</li>
+</ul>
+<p>当然本人水平有限，这个组件还有很多不足之处，期待以后有机会完善。</p>
+<p>GitHub项目地址：<a href="https://github.com/chuanqicc0430/netty-http-container" target="_blank" rel="external">https://github.com/chuanqicc0430/netty-http-container</a></p>
 
       
     </div>
@@ -357,7 +346,11 @@
       
         <div class="post-tags">
           
-            <a href="/tags/mysql/" rel="tag">#mysql</a>
+            <a href="/tags/httpserver/" rel="tag">#httpserver</a>
+          
+            <a href="/tags/java/" rel="tag">#java</a>
+          
+            <a href="/tags/netty/" rel="tag">#netty</a>
           
         </div>
       
@@ -366,12 +359,16 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2017/05/11/Mysql-多表查询优化/" rel="next" title="Mysql-多表查询优化">
+                <i class="fa fa-chevron-left"></i> Mysql-多表查询优化
+              </a>
+            
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/02/19/Netty-Based-HttpServer-1/" rel="prev" title="基于Netty实现的httpserver实现（一）">
-                基于Netty实现的httpserver实现（一） <i class="fa fa-chevron-right"></i>
+              <a href="/2017/05/11/Netty-Based-HttpServer-2/" rel="prev" title="基于Netty实现的httpserver实现（二）">
+                基于Netty实现的httpserver实现（二） <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -387,10 +384,10 @@
 
     <div class="post-spread">
       
-        <div class="ds-share flat" data-thread-key="2016/02/16/Mysql-多表查询优化/"
-     data-title="Mysql-多表查询优化"
+        <div class="ds-share flat" data-thread-key="2017/05/11/Netty-Based-HttpServer-1/"
+     data-title="基于Netty实现的httpserver实现（一）"
      data-content=""
-     data-url="http://cqzong.com/2016/02/16/Mysql-多表查询优化/">
+     data-url="http://cqzong.com/2017/05/11/Netty-Based-HttpServer-1/">
   <div class="ds-share-inline">
     <ul  class="ds-share-icons-16">
 
@@ -420,8 +417,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/02/16/Mysql-多表查询优化/"
-           data-title="Mysql-多表查询优化" data-url="http://cqzong.com/2016/02/16/Mysql-多表查询优化/">
+      <div class="ds-thread" data-thread-key="2017/05/11/Netty-Based-HttpServer-1/"
+           data-title="基于Netty实现的httpserver实现（一）" data-url="http://cqzong.com/2017/05/11/Netty-Based-HttpServer-1/">
       </div>
     
   </div>
@@ -466,7 +463,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-count">4</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -483,7 +480,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">4</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -534,7 +531,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#u6392_u67E5"><span class="nav-number">1.</span> <span class="nav-text">排查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u5206_u6790_26amp_3B_u89E3_u51B3"><span class="nav-number">2.</span> <span class="nav-text">分析&解决</span></a></li></ol></div>
+              <p class="post-toc-empty">此文章未包含目录</p>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
@@ -555,8 +552,8 @@
       <div class="footer-inner">
         <div class="copyright" >
   
-  &copy; 
-  <span itemprop="copyrightYear">2016</span>
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
   <span class="with-love">
     <i class="icon-next-heart fa fa-heart"></i>
   </span>
