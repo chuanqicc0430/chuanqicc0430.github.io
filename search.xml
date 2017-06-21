@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title><![CDATA[Dubbox源码分析]]></title>
+    <url>%2F2017%2F06%2F20%2FDubbox%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%2F</url>
+    <content type="text"><![CDATA[微服务架构微服务架构相比传统的单体架构，服务之前的依赖关系更加明确，服务职责单一，服务可以自治，在良好的服务治理体系下，可以极大提高系统的容错率以及系统的弹性。 但是相对的，微服务架构由于架构复杂，也会增加很多部署和运维成本，故障排查较困难，链路调用风险增大，团队协作成本也会上升。 如果纯粹是一名技术人员，肯定首选微服务架构，但是，从架构角度考虑，架构不单单是技术的选型，技术团队的方方面面都是需要衡量的，如团队成员的技术水平，开发流程（瀑布或敏捷），项目的大小、团队成员合理的协作方式、开发效率提升等等。其实，个人认为这些才是最难得。 在项目初期，尤其是对于创业公司来说，产品开发初期侧重点势必在于产品需求的实现，但是是基础架构的搭建不是一朝一夕就能完善的，这点要做好准备，基础平台的建设开始的越早越好，当然，前提是，老板支持。 DubboxDubbox(https://github.com/dangdangdotcom/dubbox)是当当网在阿里开源的Dubbo(http://dubbo.io/)基础上扩展而来。Dubbo阿里已经不维护了，Dubbox目前当当网基本也不再维护了，但是国内的Dubbo和Dubbox的用户还是非常多的，虽然社区活跃程度较低，但是基本问题都会找到解决方案的。建议有兴趣的同学研究一下Spring Cloud，再做决定。 严格来说，Dubbo或者Dubbox不是微服务架构的全套解决方案，个人认为Dubbox只是提供了服务发现、服务治理、服务降级的RPC框架。其他的组件需要自己开发或者引入第三方开源框架，如配置管理，DB Proxy，日志以及链路调用分析，熔断机制等等。有兴趣的同学，可以看下本人开源的Linkz(https://github.com/chuanqicc0430/Linkz)，提供了几个组件，可以结合Dubbox使用。 Dubbo主要提供服务注册发现、负载均衡、服务编排、服务降级、底层通信（可选Netty或Mina）、序列化等功能，架构图如下： 接下来，我会将阅读Dubbox的源码写下来，有兴趣的同学可以一块学习。]]></content>
+      <categories>
+        <category>Blog</category>
+      </categories>
+      <tags>
+        <tag>Dubbo</tag>
+        <tag>微服务</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[基于Netty实现的httpserver实现（二）]]></title>
+    <url>%2F2017%2F05%2F11%2FNetty-Based-HttpServer-2%2F</url>
+    <content type="text"><![CDATA[代码结构代码结构如下图所示： 其中： app: HttpApplication是业务层的基类，继承此类以实现具体业务；HttpApplication可携带上下文ApplicationContext，ApplicationContext提供编解码方法。 core: 核心层，配置、日志、过滤器、拦截器等都在这一层实现。 appHttpApplication12345678910111213public abstract class HttpApplication&lt;C extends ApplicationContext&gt; &#123; protected HttpApplication() &#123; &#125; public abstract void load() throws Exception; public abstract void unload() throws Exception; public abstract void process(ApplicationTx&lt;C&gt; tx) throws Exception;&#125; load(): 初始化资源；unload(): 释放资源；process(ApplicationTx tx): 执行业务，tx携带用户上下文和本次请求的httprequest和httpresponse； HttpPrefix12345678910@Retention(RetentionPolicy.RUNTIME)@Target(&#123; ElementType.TYPE &#125;)public @interface HttpPrefix &#123; String path(); String protocal(); HttpMethod[] method() default HttpMethod.GET;&#125; HttpPrefix注解标注了HttpApplication的请求路径，协议和方法（Post or Get）。 ApplicationContext123456789101112131415161718192021public abstract class ApplicationContext &#123; /** * * 从数据中解码 * * @param datas * @throws IOException */ public abstract void decode(byte[] datas) throws Exception; /** * * 按需编码 * * @param demand * @return */ public abstract byte[] encode(int demands) throws IOException;&#125; 用户上下文context基类，可自定义业务需要的contenxt类型。 ApplicationTx123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172public class ApplicationTx&lt;C extends ApplicationContext&gt; &#123; private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationTx.class); private C context = null; private byte[] contextData; private HttpServletRequest request; private HttpServletResponse response; public ApplicationTx(HttpServletRequest request, HttpServletResponse response) &#123; this.request = request; this.response = response; contextData = base64decode(request.getHeader("ContextData")); &#125; public C context() &#123; return context; &#125; public void setContext(C context) &#123; this.context = context; &#125; /** * &#123;在这里补充功能说明&#125; * * @param header * @return */ private byte[] base64decode(String header) &#123; return Base64.decode(header); // 暂不用decodeFast &#125; public HttpServletRequest getRequest() &#123; return request; &#125; public HttpServletResponse getResponse() &#123; return response; &#125; /** * &#123;在这里补充功能说明&#125; * * @return */ protected byte[] extractContextData() &#123; return contextData; &#125; public void processSucceed(String responseStr,String contentType) &#123; response.setStatus(200); response.setHeader("Content-Type", contentType); response.setHeader("Content-Length", String.valueOf(responseStr.length())); response.setHeader("Content-Language", "en"); try &#123; response.getWriter().write(responseStr); &#125; catch (IOException e) &#123; LOGGER.error("Send success response error!", e); &#125; &#125; public void processFailed(CUException error) &#123; response.setStatus(error.getReturnCode()); response.setHeader("Content-Type", "text/plain"); response.setHeader("Content-Length", String.valueOf(error.getMessage().length())); response.setHeader("Content-Language", "en"); try &#123; response.getWriter().write(error.getMessage()); &#125; catch (IOException e) &#123; LOGGER.error("Send failed response error!", e); &#125; &#125;&#125; ApplicationTx保存上下文ApplicationContext和本次请求的httprequest和httpresponse，并提供业务执行成功和失败应答逻辑。]]></content>
+      <categories>
+        <category>Blog</category>
+      </categories>
+      <tags>
+        <tag>httpserver</tag>
+        <tag>java</tag>
+        <tag>netty</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[基于Netty实现的httpserver实现（一）]]></title>
+    <url>%2F2017%2F05%2F11%2FNetty-Based-HttpServer-1%2F</url>
+    <content type="text"><![CDATA[目前http协议是许多App和服务端通信的首选协议，那么对于服务端来说，一个好的httpserver一定是必不可少的了。开源的嵌入式httpServer有很多，就连JDK都自带一个轻量的httpserver，我们项目最初选择的就是JDK自带的httpserver。 从代码结构来看JDK自带的httpserver真的是非常轻量，但是好处越大却缺点也越大，随着系统复杂度的提升，这种轻量的组件越来越力不从心，对开发人员相当不友好，业务与底层耦合太强，代码复杂度越来越高的同时，性能越来越差。 最近生产环境这个server屡次出问题，已经到了没法忍受的地步，而且相对其他httpserver来说，性能并没有很高，因此改造httpserver提升日程。 接下来几篇将介绍本次项目实现的基于netty的高性能httpserver，特点如下： 基于Netty的高性能、高可靠性的特性，可以满足大多数业务场景的并发需求； 业务与底层解耦，开发人员只需关心业务细节即可； 极简的使用方式，注解式编程。 当然本人水平有限，这个组件还有很多不足之处，期待以后有机会完善。 GitHub项目地址：https://github.com/chuanqicc0430/netty-http-container]]></content>
+      <categories>
+        <category>Blog</category>
+      </categories>
+      <tags>
+        <tag>httpserver</tag>
+        <tag>java</tag>
+        <tag>netty</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Mysql-多表查询优化]]></title>
+    <url>%2F2017%2F05%2F11%2FMysql-%E5%A4%9A%E8%A1%A8%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96%2F</url>
+    <content type="text"><![CDATA[猴年开年第一篇，mark一下。 关于mysql的多表查询优化，之前一直没有注意，最近写的一个自认为还OK的sql在生产环境中出现了问题，在此记录一下。 排查机器的CPU占用100%，查看业务日志，在执行问题sql的时候抛出异常：1java.sql.SQLException: An attempt by a client to checkout a Connection has timed out. 这个库连接肯定没问题，因为别的业务也在用这个库，所以定位这条sql写的有问题。问题原因暂且放在一边，先把业务恢复了。1show processlist; 列出所有正在运行的线程信息，发现这条问题sql卡在了 Sending data 状态： 直接执行 kill 线程号，杀掉这个线程，CPU立马就降下来了。1kill 256397; 值得注意的是，Sending data 状态官方解释是:正在处理Select查询的记录，同时正在把结果发送给客户端。如果卡在这个状态这个可能有两种情况： 卡在了查询状态，也就是mysql正在收集数据； 卡在了发送数据给客户端状态，这个可能是因为查询的数据量太大，堵塞了网络IO 分析&amp;解决这个sql出现问题的原因暂时还无解，因为 explain 之后的分析结果看，这个sql还是说得过去的，测试环境跑的也没问题，但是生产环境就有问题，有空向大拿请教一下。 解决思路是使用子查询，尽可能的在子查询中缩小数据查询范围，但是优化后的sql explain之后看并没有改善太多，很奇怪： 以下是优化前和优化后的sql，请有经验的同学不吝赐教，感谢！ 12345678910111213141516171819202122232425SELECT fl.id AS `fileLogId`, fl.MD5 AS `smallPortrait`, fl.userId AS `userId`, p.id AS `portraitId`, fl.updateTime AS `updateTime`FROM `CU_Log`.`UP_FileLog` fl, `CU`.`UP_Portrait` p, `CU`.`UP_User` uWHERE fl.userId = p.userId AND fl.userId = u.userId AND u.gender = 2 AND fl.`userId` &gt; 10000000 AND fl.`userId` &lt; 80000000 AND fl.`MD5` &lt;&gt; '94F46FECE6D8611C' AND fl.fileType = 2 AND fl.actionType = 1 AND fl.MD5 = p.smallPortrait AND p.`order` = (SELECT MIN(`order`) FROM `CU`.`UP_Portrait` WHERE userId = p.userId) AND fl.`MD5` NOT IN(SELECT `md5` FROM `CU`.`CU_BlackFile`) AND fl.`id` NOT IN(SELECT `fileLogId` FROM `CustomerSystem`.`CheckAvatarLog`) AND p.id NOT IN(SELECT `portraitId` FROM `CustomerSystem`.`CheckAvatarLog`)GROUP BY p.idORDER BY `updateTime` DESCLIMIT 8; 123456789101112131415161718192021222324252627282930SELECT f.fileLogId AS `fileLogId`, f.MD5 AS `smallPortrait`, u.userId AS `userId`, f.portraitId AS `portraitId`, f.updateTime AS `updateTime`FROM (SELECT fl.`id` AS `fileLogId`, fl.`MD5`, up.id AS portraitId, fl.`updateTime`, fl.`userId` FROM `CU_Log`.`UP_FileLog` fl, `CU`.`UP_Portrait` up WHERE fl.`userId` &gt; 10000000 AND fl.`userId` &lt; 80000000 AND fl.`actionType` = 1 AND fl.`fileType` = 2 AND fl.`MD5` &lt;&gt; '94F46FECE6D8611C' AND fl.`userId` IN(SELECT u.`userId` FROM `CU`.`UP_User` u WHERE u.`userId` = fl.`userId` AND u.`gender` = 2) AND fl.`MD5` NOT IN(SELECT bf.`md5` FROM `CU`.`CU_BlackFile` bf WHERE bf.`md5` = fl.`MD5`) AND fl.userId = up.userId AND fl.MD5 = up.smallPortrait AND up.`order` = (SELECT MIN(`order`) FROM `CU`.`UP_Portrait` WHERE userId = up.userId) GROUP BY fl.`userId` HAVING `fileLogId` NOT IN(SELECT cl.`fileLogId` FROM `CustomerSystem`.`CheckAvatarLog` cl WHERE cl.`fileLogId` = `fileLogId`) ORDER BY `updateTime` DESC LIMIT 8 ) f, `CU`.`UP_User` uWHERE f.`userId` = u.`userId`]]></content>
+      <categories>
+        <category>Blog</category>
+      </categories>
+      <tags>
+        <tag>mysql</tag>
+      </tags>
+  </entry>
+</search>

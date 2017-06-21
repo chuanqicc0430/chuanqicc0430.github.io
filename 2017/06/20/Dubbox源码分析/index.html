@@ -5,7 +5,7 @@
   
 
 
-<html class="theme-next muse use-motion" lang="zh-Hans">
+<html class="theme-next mist use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -77,7 +77,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Dubbox,微服务架构" />
 
 
 
@@ -93,16 +93,17 @@
 
 
 
-<meta name="description" content="但行好事，莫问前程">
+<meta name="description" content="Dubbox(https://github.com/dangdangdotcom/dubbox)是当当网在阿里开源的Dubbo(http://dubbo.io/)基础上扩展而来。Dubbo阿里已经不维护了，Dubbox目前当当网基本也不再维护了，但是国内的Dubbo和Dubbox的用户还是非常多的，虽然社区活跃程度较低，但是基本问题都会找到解决方案的。接下来，我会将阅读Dubbox的源码写下来，有">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Dubbox源码分析">
 <meta property="og:url" content="http://cqzong.com/2017/06/20/Dubbox源码分析/index.html">
 <meta property="og:site_name" content="ChuaqiQi's Blogs">
-<meta property="og:description" content="但行好事，莫问前程">
-<meta property="og:updated_time" content="2017-06-20T09:42:09.377Z">
+<meta property="og:description" content="Dubbox(https://github.com/dangdangdotcom/dubbox)是当当网在阿里开源的Dubbo(http://dubbo.io/)基础上扩展而来。Dubbo阿里已经不维护了，Dubbox目前当当网基本也不再维护了，但是国内的Dubbo和Dubbox的用户还是非常多的，虽然社区活跃程度较低，但是基本问题都会找到解决方案的。接下来，我会将阅读Dubbox的源码写下来，有">
+<meta property="og:image" content="http://orvmy4v7l.bkt.clouddn.com/dubbo-architecture.jpg-version=1&modificationDate=1330892870000.jpg">
+<meta property="og:updated_time" content="2017-06-21T07:03:13.540Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Dubbox源码分析">
-<meta name="twitter:description" content="但行好事，莫问前程">
+<meta name="twitter:description" content="Dubbox(https://github.com/dangdangdotcom/dubbox)是当当网在阿里开源的Dubbo(http://dubbo.io/)基础上扩展而来。Dubbo阿里已经不维护了，Dubbox目前当当网基本也不再维护了，但是国内的Dubbo和Dubbox的用户还是非常多的，虽然社区活跃程度较低，但是基本问题都会找到解决方案的。接下来，我会将阅读Dubbox的源码写下来，有">
 
 
 
@@ -110,7 +111,7 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Muse',
+    scheme: 'Mist',
     sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
     fancybox: true,
     motion: true,
@@ -335,6 +336,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Blog/" itemprop="url" rel="index">
+                    <span itemprop="name">Blog</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -358,6 +381,10 @@
           
 
           
+              <div class="post-description">
+                  Dubbox(https://github.com/dangdangdotcom/dubbox)是当当网在阿里开源的Dubbo(http://dubbo.io/)基础上扩展而来。Dubbo阿里已经不维护了，Dubbox目前当当网基本也不再维护了，但是国内的Dubbo和Dubbox的用户还是非常多的，虽然社区活跃程度较低，但是基本问题都会找到解决方案的。接下来，我会将阅读Dubbox的源码写下来，有兴趣的同学可以一块学习。
+              </div>
+          
 
         </div>
       </header>
@@ -369,7 +396,15 @@
       
 
       
-        
+        <h3 id="u5FAE_u670D_u52A1_u67B6_u6784"><a href="#u5FAE_u670D_u52A1_u67B6_u6784" class="headerlink" title="微服务架构"></a>微服务架构</h3><p><strong>微服务架构</strong>相比传统的单体架构，服务之前的依赖关系更加明确，服务职责单一，服务可以自治，在良好的服务治理体系下，可以极大提高系统的容错率以及系统的弹性。</p>
+<p>但是相对的，微服务架构由于架构复杂，也会增加很多部署和运维成本，故障排查较困难，链路调用风险增大，团队协作成本也会上升。</p>
+<p>如果纯粹是一名技术人员，肯定首选微服务架构，但是，从架构角度考虑，架构不单单是技术的选型，技术团队的方方面面都是需要衡量的，如团队成员的技术水平，开发流程（瀑布或敏捷），项目的大小、团队成员合理的协作方式、开发效率提升等等。其实，个人认为这些才是最难得。</p>
+<p>在项目初期，尤其是对于创业公司来说，产品开发初期侧重点势必在于产品需求的实现，但是是基础架构的搭建不是一朝一夕就能完善的，这点要做好准备，基础平台的建设开始的越早越好，当然，前提是，老板支持。</p>
+<h3 id="Dubbox"><a href="#Dubbox" class="headerlink" title="Dubbox"></a>Dubbox</h3><p><strong>Dubbox</strong>(<a href="https://github.com/dangdangdotcom/dubbox" target="_blank" rel="external">https://github.com/dangdangdotcom/dubbox</a>)是当当网在阿里开源的<strong>Dubbo</strong>(<a href="http://dubbo.io/" target="_blank" rel="external">http://dubbo.io/</a>)基础上扩展而来。Dubbo阿里已经不维护了，Dubbox目前当当网基本也不再维护了，但是国内的Dubbo和Dubbox的用户还是非常多的，虽然社区活跃程度较低，但是基本问题都会找到解决方案的。建议有兴趣的同学研究一下Spring Cloud，再做决定。</p>
+<p>严格来说，Dubbo或者Dubbox不是微服务架构的全套解决方案，个人认为Dubbox只是提供了服务发现、服务治理、服务降级的RPC框架。其他的组件需要自己开发或者引入第三方开源框架，如配置管理，DB Proxy，日志以及链路调用分析，熔断机制等等。有兴趣的同学，可以看下本人开源的Linkz(<a href="https://github.com/chuanqicc0430/Linkz" target="_blank" rel="external">https://github.com/chuanqicc0430/Linkz</a>)，提供了几个组件，可以结合Dubbox使用。</p>
+<p>Dubbo主要提供服务注册发现、负载均衡、服务编排、服务降级、底层通信（可选Netty或Mina）、序列化等功能，架构图如下：<br><img src="http://orvmy4v7l.bkt.clouddn.com/dubbo-architecture.jpg-version=1&amp;modificationDate=1330892870000.jpg" alt="image1"></p>
+<p>接下来，我会将阅读Dubbox的源码写下来，有兴趣的同学可以一块学习。</p>
+
       
     </div>
 
@@ -396,6 +431,14 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/Dubbo/" rel="tag"># Dubbo</a>
+          
+            <a href="/tags/微服务/" rel="tag"># 微服务</a>
+          
+        </div>
+      
 
       
       
@@ -414,10 +457,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/06/20/Netty-Based-HttpServer-3/" rel="prev" title="基于Netty实现的httpserver(实现三)">
-                基于Netty实现的httpserver(实现三) <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -468,8 +507,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="https://avatars1.githubusercontent.com/u/4696232?v=3&s=460"
@@ -484,7 +532,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">4</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -506,7 +554,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -552,6 +600,22 @@
       </section>
 
       
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#u5FAE_u670D_u52A1_u67B6_u6784"><span class="nav-number">1.</span> <span class="nav-text">微服务架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dubbox"><span class="nav-number">2.</span> <span class="nav-text">Dubbox</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
 
       
 
@@ -583,7 +647,7 @@
 <div class="theme-info">
   主题 -
   <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Muse
+    NexT.Mist
   </a>
 </div>
 
@@ -718,6 +782,323 @@
 
 
   
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
 
 
 
