@@ -77,7 +77,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="mysql,多表查询" />
 
 
 
@@ -93,15 +93,21 @@
 
 
 
-<meta name="description" content="但行好事，莫问前程">
-<meta property="og:type" content="website">
-<meta property="og:title" content="ChuaqiQi&#39;s Blogs">
-<meta property="og:url" content="http://cqzong.com/archives/index.html">
+<meta name="description" content="关于mysql的多表查询优化，之前一直没有注意，最近写的一个自认为还OK的sql在生产环境中出现了问题，在此记录一下。">
+<meta name="keywords" content="mysql,多表查询">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mysql-多表查询优化">
+<meta property="og:url" content="http://cqzong.com/2016/02/16/Mysql-多表查询优化/index.html">
 <meta property="og:site_name" content="ChuaqiQi&#39;s Blogs">
-<meta property="og:description" content="但行好事，莫问前程">
+<meta property="og:description" content="关于mysql的多表查询优化，之前一直没有注意，最近写的一个自认为还OK的sql在生产环境中出现了问题，在此记录一下。">
+<meta property="og:image" content="http://cl.ly/1o2q2R2v0Y0D/Image%202016-02-16%20at%2010.56.45.png">
+<meta property="og:image" content="http://cl.ly/2L0p3W070n2K/Image%202016-02-16%20at%2011.23.03.png">
+<meta property="og:image" content="http://cl.ly/2w2V2R2u0Q1j/Image%202016-02-16%20at%2011.27.44.png">
+<meta property="og:updated_time" content="2016-02-16T03:48:32.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ChuaqiQi&#39;s Blogs">
-<meta name="twitter:description" content="但行好事，莫问前程">
+<meta name="twitter:title" content="Mysql-多表查询优化">
+<meta name="twitter:description" content="关于mysql的多表查询优化，之前一直没有注意，最近写的一个自认为还OK的sql在生产环境中出现了问题，在此记录一下。">
+<meta name="twitter:image" content="http://cl.ly/1o2q2R2v0Y0D/Image%202016-02-16%20at%2010.56.45.png">
 
 
 
@@ -129,13 +135,13 @@
 
 
 
-  <link rel="canonical" href="http://cqzong.com/archives/"/>
+  <link rel="canonical" href="http://cqzong.com/2016/02/16/Mysql-多表查询优化/"/>
 
 
 
 
 
-  <title>归档 | ChuaqiQi's Blogs</title>
+  <title>Mysql-多表查询优化 | ChuaqiQi's Blogs</title>
   
 
 
@@ -170,7 +176,7 @@
     
   
 
-  <div class="container sidebar-position-left  page-archive  ">
+  <div class="container sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -284,219 +290,202 @@
           <div id="content" class="content">
             
 
-  <section id="posts" class="posts-collapse">
-    <span class="archive-move-on"></span>
-
-    <span class="archive-page-counter">
-      
-      
-      
-        
-      
-      嗯..! 目前共计 5 篇日志。 继续努力。
-    </span>
-
+  <div id="posts" class="posts-expand">
     
-
-      
-      
-      
-
-      
-        
-        <div class="collection-title">
-          <h2 class="archive-year motion-element" id="archive-year-2017">2017</h2>
-        </div>
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2017/12/30/2017年终总结/" itemprop="url">
-              
-                <span itemprop="name">2017年总结</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2017-12-30T10:42:09+08:00"
-              content="2017-12-30" >
-          12-30
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-      
-      
-      
-
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2017/06/20/Dubbox源码分析/" itemprop="url">
-              
-                <span itemprop="name">Dubbox源码分析</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2017-06-20T17:42:09+08:00"
-              content="2017-06-20" >
-          06-20
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-      
-      
-      
-
-      
-        
-        <div class="collection-title">
-          <h2 class="archive-year motion-element" id="archive-year-2016">2016</h2>
-        </div>
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2016/02/19/Netty-Based-HttpServer-2/" itemprop="url">
-              
-                <span itemprop="name">基于Netty实现的httpserver实现（二）</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-02-19T16:58:41+08:00"
-              content="2016-02-19" >
-          02-19
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-      
-      
-      
-
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2016/02/19/Netty-Based-HttpServer-1/" itemprop="url">
-              
-                <span itemprop="name">基于Netty实现的httpserver实现（一）</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-02-19T15:00:36+08:00"
-              content="2016-02-19" >
-          02-19
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-      
-      
-      
-
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2016/02/16/Mysql-多表查询优化/" itemprop="url">
-              
-                <span itemprop="name">Mysql-多表查询优化</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-02-16T11:48:32+08:00"
-              content="2016-02-16" >
-          02-16
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-  </section>
 
   
 
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://cqzong.com/2016/02/16/Mysql-多表查询优化/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="宗传奇">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars1.githubusercontent.com/u/4696232?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ChuaqiQi's Blogs">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Mysql-多表查询优化</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-16T11:48:32+08:00">
+                2016-02-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Blog/" itemprop="url" rel="index">
+                    <span itemprop="name">Blog</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/02/16/Mysql-多表查询优化/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/02/16/Mysql-多表查询优化/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  关于mysql的多表查询优化，之前一直没有注意，最近写的一个自认为还OK的sql在生产环境中出现了问题，在此记录一下。
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>猴年开年第一篇，mark一下。</p>
+<p>关于mysql的多表查询优化，之前一直没有注意，最近写的一个自认为还OK的sql在生产环境中出现了问题，在此记录一下。</p>
+<h3 id="u6392_u67E5"><a href="#u6392_u67E5" class="headerlink" title="排查"></a>排查</h3><p>机器的CPU占用100%，查看业务日志，在执行问题sql的时候抛出异常：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java.sql.SQLException: An attempt by a client to checkout a Connection has timed out.</div></pre></td></tr></table></figure></p>
+<p>这个库连接肯定没问题，因为别的业务也在用这个库，所以定位这条sql写的有问题。<br>问题原因暂且放在一边，先把业务恢复了。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">show processlist;</div></pre></td></tr></table></figure></p>
+<p>列出所有正在运行的线程信息，发现这条问题sql卡在了 <strong>Sending data</strong> 状态：</p>
+<p><img src="http://cl.ly/1o2q2R2v0Y0D/Image%202016-02-16%20at%2010.56.45.png" alt="image1"></p>
+<p>直接执行 <strong>kill 线程号</strong>，杀掉这个线程，CPU立马就降下来了。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">kill</span> 256397;</div></pre></td></tr></table></figure></p>
+<p>值得注意的是，<strong>Sending data</strong> 状态官方解释是:正在处理Select查询的记录，同时正在把结果发送给客户端。如果卡在这个状态这个可能有两种情况：</p>
+<ol>
+<li>卡在了查询状态，也就是mysql正在收集数据；</li>
+<li>卡在了发送数据给客户端状态，这个可能是因为查询的数据量太大，堵塞了网络IO</li>
+</ol>
+<h3 id="u5206_u6790_26amp_3B_u89E3_u51B3"><a href="#u5206_u6790_26amp_3B_u89E3_u51B3" class="headerlink" title="分析&amp;解决"></a>分析&amp;解决</h3><p>这个sql出现问题的原因暂时还无解，因为 <strong>explain</strong> 之后的分析结果看，这个sql还是说得过去的，测试环境跑的也没问题，但是生产环境就有问题，有空向大拿请教一下。</p>
+<p><img src="http://cl.ly/2L0p3W070n2K/Image%202016-02-16%20at%2011.23.03.png" alt="image2"></p>
+<p>解决思路是使用子查询，尽可能的在子查询中缩小数据查询范围，但是优化后的sql <strong>explain</strong>之后看并没有改善太多，很奇怪：</p>
+<p><img src="http://cl.ly/2w2V2R2u0Q1j/Image%202016-02-16%20at%2011.27.44.png" alt="image3"></p>
+<p>以下是优化前和优化后的sql，请有经验的同学不吝赐教，感谢！</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">SELECT</div><div class="line">  fl.id         AS `fileLogId`,</div><div class="line">  fl.MD5        AS `smallPortrait`,</div><div class="line">  fl.userId     AS `userId`,</div><div class="line">  p.id          AS `portraitId`,</div><div class="line">  fl.updateTime AS `updateTime`</div><div class="line">FROM `CU_Log`.`UP_FileLog` fl,</div><div class="line">  `CU`.`UP_Portrait` p,</div><div class="line">  `CU`.`UP_User` u</div><div class="line">WHERE fl.userId = p.userId</div><div class="line">    AND fl.userId = u.userId</div><div class="line">    AND u.gender = 2</div><div class="line">    AND fl.`userId` &gt; 10000000</div><div class="line">    AND fl.`userId` &lt; 80000000</div><div class="line">    AND fl.`MD5` &lt;&gt; <span class="string">'94F46FECE6D8611C'</span></div><div class="line">    AND fl.fileType = 2</div><div class="line">    AND fl.actionType = 1</div><div class="line">    AND fl.MD5 = p.smallPortrait</div><div class="line">    AND p.`order` = (SELECT MIN(`order`) FROM `CU`.`UP_Portrait` WHERE userId = p.userId)</div><div class="line">    AND fl.`MD5` NOT IN(SELECT `md5` FROM `CU`.`CU_BlackFile`)</div><div class="line">    AND fl.`id` NOT IN(SELECT `fileLogId` FROM `CustomerSystem`.`CheckAvatarLog`)</div><div class="line">    AND p.id NOT IN(SELECT `portraitId` FROM `CustomerSystem`.`CheckAvatarLog`)</div><div class="line">GROUP BY p.id</div><div class="line">ORDER BY `updateTime` DESC</div><div class="line">LIMIT 8;</div></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">SELECT</div><div class="line">  f.fileLogId  AS `fileLogId`,</div><div class="line">  f.MD5        AS `smallPortrait`,</div><div class="line">  u.userId     AS `userId`,</div><div class="line">  f.portraitId AS `portraitId`,</div><div class="line">  f.updateTime AS `updateTime`</div><div class="line">FROM (SELECT</div><div class="line">        fl.`id`         AS `fileLogId`,</div><div class="line">        fl.`MD5`,</div><div class="line">        up.id           AS portraitId,</div><div class="line">        fl.`updateTime`,</div><div class="line">        fl.`userId`</div><div class="line">      FROM `CU_Log`.`UP_FileLog` fl,</div><div class="line">        `CU`.`UP_Portrait` up</div><div class="line">      WHERE fl.`userId` &gt; 10000000</div><div class="line">          AND fl.`userId` &lt; 80000000</div><div class="line">          AND fl.`actionType` = 1</div><div class="line">          AND fl.`fileType` = 2</div><div class="line">          AND fl.`MD5` &lt;&gt; <span class="string">'94F46FECE6D8611C'</span></div><div class="line">          AND fl.`userId` IN(SELECT u.`userId` FROM `CU`.`UP_User` u WHERE u.`userId` = fl.`userId` AND u.`gender` = 2)</div><div class="line">          AND fl.`MD5` NOT IN(SELECT bf.`md5` FROM `CU`.`CU_BlackFile` bf WHERE bf.`md5` = fl.`MD5`)</div><div class="line">          AND fl.userId = up.userId</div><div class="line">          AND fl.MD5 = up.smallPortrait</div><div class="line">          AND up.`order` = (SELECT MIN(`order`) FROM `CU`.`UP_Portrait` WHERE userId = up.userId)</div><div class="line">      GROUP BY fl.`userId`</div><div class="line">      HAVING `fileLogId` NOT IN(SELECT cl.`fileLogId` FROM `CustomerSystem`.`CheckAvatarLog` cl WHERE cl.`fileLogId` = `fileLogId`)</div><div class="line">      ORDER BY `updateTime` DESC</div><div class="line">      LIMIT 8 ) f,</div><div class="line">  `CU`.`UP_User` u</div><div class="line">WHERE f.`userId` = u.`userId`</div></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mysql/" rel="tag"># mysql</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/02/19/Netty-Based-HttpServer-1/" rel="prev" title="基于Netty实现的httpserver实现（一）">
+                基于Netty实现的httpserver实现（一） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -504,6 +493,14 @@
 
 
           
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/02/16/Mysql-多表查询优化/"
+           data-title="Mysql-多表查询优化" data-url="http://cqzong.com/2016/02/16/Mysql-多表查询优化/">
+      </div>
+    
+  </div>
+
 
         </div>
         
@@ -523,8 +520,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="https://avatars1.githubusercontent.com/u/4696232?v=3&s=460"
@@ -606,6 +612,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#u6392_u67E5"><span class="nav-number">1.</span> <span class="nav-text">排查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#u5206_u6790_26amp_3B_u89E3_u51B3"><span class="nav-number">2.</span> <span class="nav-text">分析&解决</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -719,11 +741,9 @@
   
 
   
-  
-    <script type="text/javascript" id="motion.page.archive">
-      $('.archive-year').velocity('transition.slideLeftIn');
-    </script>
-  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
 
 
   

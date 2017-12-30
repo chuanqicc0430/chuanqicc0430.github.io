@@ -77,7 +77,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="netty,httpserver,java,高性能" />
 
 
 
@@ -93,15 +93,17 @@
 
 
 
-<meta name="description" content="但行好事，莫问前程">
-<meta property="og:type" content="website">
-<meta property="og:title" content="ChuaqiQi&#39;s Blogs">
-<meta property="og:url" content="http://cqzong.com/archives/index.html">
+<meta name="description" content="接下来几篇将介绍本次项目实现的基于netty的高性能httpserver，特点如下：1. 基于Netty的高性能、高可靠性的特性，可以满足大多数业务场景的并发需求；2. 业务与底层解耦，开发人员只需关心业务细节即可；3. 极简的使用方式，注解式编程。">
+<meta name="keywords" content="netty,httpserver,java,高性能">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于Netty实现的httpserver实现（一）">
+<meta property="og:url" content="http://cqzong.com/2016/02/19/Netty-Based-HttpServer-1/index.html">
 <meta property="og:site_name" content="ChuaqiQi&#39;s Blogs">
-<meta property="og:description" content="但行好事，莫问前程">
+<meta property="og:description" content="接下来几篇将介绍本次项目实现的基于netty的高性能httpserver，特点如下：1. 基于Netty的高性能、高可靠性的特性，可以满足大多数业务场景的并发需求；2. 业务与底层解耦，开发人员只需关心业务细节即可；3. 极简的使用方式，注解式编程。">
+<meta property="og:updated_time" content="2016-02-19T07:00:36.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ChuaqiQi&#39;s Blogs">
-<meta name="twitter:description" content="但行好事，莫问前程">
+<meta name="twitter:title" content="基于Netty实现的httpserver实现（一）">
+<meta name="twitter:description" content="接下来几篇将介绍本次项目实现的基于netty的高性能httpserver，特点如下：1. 基于Netty的高性能、高可靠性的特性，可以满足大多数业务场景的并发需求；2. 业务与底层解耦，开发人员只需关心业务细节即可；3. 极简的使用方式，注解式编程。">
 
 
 
@@ -129,13 +131,13 @@
 
 
 
-  <link rel="canonical" href="http://cqzong.com/archives/"/>
+  <link rel="canonical" href="http://cqzong.com/2016/02/19/Netty-Based-HttpServer-1/"/>
 
 
 
 
 
-  <title>归档 | ChuaqiQi's Blogs</title>
+  <title>基于Netty实现的httpserver实现（一） | ChuaqiQi's Blogs</title>
   
 
 
@@ -170,7 +172,7 @@
     
   
 
-  <div class="container sidebar-position-left  page-archive  ">
+  <div class="container sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -284,219 +286,202 @@
           <div id="content" class="content">
             
 
-  <section id="posts" class="posts-collapse">
-    <span class="archive-move-on"></span>
-
-    <span class="archive-page-counter">
-      
-      
-      
-        
-      
-      嗯..! 目前共计 5 篇日志。 继续努力。
-    </span>
-
+  <div id="posts" class="posts-expand">
     
-
-      
-      
-      
-
-      
-        
-        <div class="collection-title">
-          <h2 class="archive-year motion-element" id="archive-year-2017">2017</h2>
-        </div>
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2017/12/30/2017年终总结/" itemprop="url">
-              
-                <span itemprop="name">2017年总结</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2017-12-30T10:42:09+08:00"
-              content="2017-12-30" >
-          12-30
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-      
-      
-      
-
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2017/06/20/Dubbox源码分析/" itemprop="url">
-              
-                <span itemprop="name">Dubbox源码分析</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2017-06-20T17:42:09+08:00"
-              content="2017-06-20" >
-          06-20
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-      
-      
-      
-
-      
-        
-        <div class="collection-title">
-          <h2 class="archive-year motion-element" id="archive-year-2016">2016</h2>
-        </div>
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2016/02/19/Netty-Based-HttpServer-2/" itemprop="url">
-              
-                <span itemprop="name">基于Netty实现的httpserver实现（二）</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-02-19T16:58:41+08:00"
-              content="2016-02-19" >
-          02-19
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-      
-      
-      
-
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2016/02/19/Netty-Based-HttpServer-1/" itemprop="url">
-              
-                <span itemprop="name">基于Netty实现的httpserver实现（一）</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-02-19T15:00:36+08:00"
-              content="2016-02-19" >
-          02-19
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-      
-      
-      
-
-      
-      
-
-      
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2016/02/16/Mysql-多表查询优化/" itemprop="url">
-              
-                <span itemprop="name">Mysql-多表查询优化</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2016-02-16T11:48:32+08:00"
-              content="2016-02-16" >
-          02-16
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-    
-
-  </section>
 
   
 
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://cqzong.com/2016/02/19/Netty-Based-HttpServer-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="宗传奇">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars1.githubusercontent.com/u/4696232?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ChuaqiQi's Blogs">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于Netty实现的httpserver实现（一）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-19T15:00:36+08:00">
+                2016-02-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Blog/" itemprop="url" rel="index">
+                    <span itemprop="name">Blog</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/02/19/Netty-Based-HttpServer-1/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/02/19/Netty-Based-HttpServer-1/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  接下来几篇将介绍本次项目实现的基于netty的高性能httpserver，特点如下：1. 基于Netty的高性能、高可靠性的特性，可以满足大多数业务场景的并发需求；2. 业务与底层解耦，开发人员只需关心业务细节即可；3. 极简的使用方式，注解式编程。
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>目前http协议是许多App和服务端通信的首选协议，那么对于服务端来说，一个好的httpserver一定是必不可少的了。开源的嵌入式httpServer有很多，就连JDK都自带一个轻量的httpserver，我们项目最初选择的就是JDK自带的httpserver。</p>
+<p>从代码结构来看JDK自带的httpserver真的是非常轻量，但是好处越大却缺点也越大，随着系统复杂度的提升，这种轻量的组件越来越力不从心，对开发人员相当不友好，业务与底层耦合太强，代码复杂度越来越高的同时，性能越来越差。</p>
+<p>最近生产环境这个server屡次出问题，已经到了没法忍受的地步，而且相对其他httpserver来说，性能并没有很高，因此改造httpserver提升日程。</p>
+<p>接下来几篇将介绍本次项目实现的基于netty的高性能httpserver，特点如下：</p>
+<ul>
+<li>基于Netty的高性能、高可靠性的特性，可以满足大多数业务场景的并发需求；</li>
+<li>业务与底层解耦，开发人员只需关心业务细节即可；</li>
+<li>极简的使用方式，注解式编程。</li>
+</ul>
+<p>当然本人水平有限，这个组件还有很多不足之处，期待以后有机会完善。</p>
+<p>GitHub项目地址：<a href="https://github.com/chuanqicc0430/netty-http-container" target="_blank" rel="external">https://github.com/chuanqicc0430/netty-http-container</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/httpserver/" rel="tag"># httpserver</a>
+          
+            <a href="/tags/netty/" rel="tag"># netty</a>
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/16/Mysql-多表查询优化/" rel="next" title="Mysql-多表查询优化">
+                <i class="fa fa-chevron-left"></i> Mysql-多表查询优化
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/02/19/Netty-Based-HttpServer-2/" rel="prev" title="基于Netty实现的httpserver实现（二）">
+                基于Netty实现的httpserver实现（二） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -504,6 +489,14 @@
 
 
           
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/02/19/Netty-Based-HttpServer-1/"
+           data-title="基于Netty实现的httpserver实现（一）" data-url="http://cqzong.com/2016/02/19/Netty-Based-HttpServer-1/">
+      </div>
+    
+  </div>
+
 
         </div>
         
@@ -719,11 +712,9 @@
   
 
   
-  
-    <script type="text/javascript" id="motion.page.archive">
-      $('.archive-year').velocity('transition.slideLeftIn');
-    </script>
-  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
 
 
   
