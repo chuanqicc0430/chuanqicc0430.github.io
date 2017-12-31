@@ -93,18 +93,18 @@
 
 
 
-<meta name="description" content="mysql是Java工程师面试时最经常被问到的技术点，因为mysql技术点太多了，很容易考察出被面试人的技术广度和深度。现总结一下mysql的基础知识点，但只是一份入门级的总结，不会太深入，期望能尽量覆盖到mysql常用知识点。">
+<meta name="description" content="mysql是Java工程师面试时最经常被问到的技术点，因为mysql技术点太多了，很容易考察出被面试人的技术广度和深度。现总结一下mysql的基础知识点，但只是一份入门级的总结，不会太深入，期望能尽量覆盖到mysql常用知识点。本篇介绍mysql数据引擎和Innodb引擎的逻辑存储结构、关键特性、与MyIsam引擎的区别等。">
 <meta name="keywords" content="mysql,总结">
 <meta property="og:type" content="article">
 <meta property="og:title" content="mysql总结（一）">
 <meta property="og:url" content="http://cqzong.com/2017/12/30/mysql总结（一）/index.html">
 <meta property="og:site_name" content="ChuaqiQi&#39;s Blogs">
-<meta property="og:description" content="mysql是Java工程师面试时最经常被问到的技术点，因为mysql技术点太多了，很容易考察出被面试人的技术广度和深度。现总结一下mysql的基础知识点，但只是一份入门级的总结，不会太深入，期望能尽量覆盖到mysql常用知识点。">
+<meta property="og:description" content="mysql是Java工程师面试时最经常被问到的技术点，因为mysql技术点太多了，很容易考察出被面试人的技术广度和深度。现总结一下mysql的基础知识点，但只是一份入门级的总结，不会太深入，期望能尽量覆盖到mysql常用知识点。本篇介绍mysql数据引擎和Innodb引擎的逻辑存储结构、关键特性、与MyIsam引擎的区别等。">
 <meta property="og:image" content="http://orvmy4v7l.bkt.clouddn.com/innodb-logical-structure.jpg">
-<meta property="og:updated_time" content="2017-12-30T08:31:14.761Z">
+<meta property="og:updated_time" content="2017-12-31T08:45:42.861Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="mysql总结（一）">
-<meta name="twitter:description" content="mysql是Java工程师面试时最经常被问到的技术点，因为mysql技术点太多了，很容易考察出被面试人的技术广度和深度。现总结一下mysql的基础知识点，但只是一份入门级的总结，不会太深入，期望能尽量覆盖到mysql常用知识点。">
+<meta name="twitter:description" content="mysql是Java工程师面试时最经常被问到的技术点，因为mysql技术点太多了，很容易考察出被面试人的技术广度和深度。现总结一下mysql的基础知识点，但只是一份入门级的总结，不会太深入，期望能尽量覆盖到mysql常用知识点。本篇介绍mysql数据引擎和Innodb引擎的逻辑存储结构、关键特性、与MyIsam引擎的区别等。">
 <meta name="twitter:image" content="http://orvmy4v7l.bkt.clouddn.com/innodb-logical-structure.jpg">
 
 
@@ -384,7 +384,7 @@
 
           
               <div class="post-description">
-                  mysql是Java工程师面试时最经常被问到的技术点，因为mysql技术点太多了，很容易考察出被面试人的技术广度和深度。现总结一下mysql的基础知识点，但只是一份入门级的总结，不会太深入，期望能尽量覆盖到mysql常用知识点。
+                  mysql是Java工程师面试时最经常被问到的技术点，因为mysql技术点太多了，很容易考察出被面试人的技术广度和深度。现总结一下mysql的基础知识点，但只是一份入门级的总结，不会太深入，期望能尽量覆盖到mysql常用知识点。本篇介绍mysql数据引擎和Innodb引擎的逻辑存储结构、关键特性、与MyIsam引擎的区别等。
               </div>
           
 
@@ -410,7 +410,7 @@
 </ul>
 </li>
 <li>innodb索引<ul>
-<li>innodb索引原理，B/B+树简单介绍</li>
+<li>innodb索引原理</li>
 <li>索引的使用和优化经验。</li>
 <li>SQL优化经验和大数据量下的数据存储优化</li>
 </ul>
@@ -500,6 +500,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2017/12/31/mysql总结（二）/" rel="prev" title="mysql总结（二）">
+                mysql总结（二） <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -574,7 +578,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives/">
-                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
