@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" >
+    <meta http-equiv="X-UA-Compatible" content="IE=11,IE=10,IE=9,IE=8" >
+    <meta name="baidu-site-verification" content="dIcXMeY8Ya" />
+    
+    <title>mysql总结之Innodb索引 | ChuanQi&#39;s Blogs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" >
+    <meta name="keywords" content="cqzong, 后端, 服务端, Java, 宗传奇, 后端开发, 架构" >
+    <meta name="description" content="cqzong个人小站" >
+
+    
+    <link rel="alternative" href="/atom.xml" title="ChuanQi&#39;s Blogs" type="application/atom+xml" >
+    
+    
+    <link rel="shortcut icon" href="/favicon.ico" >
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <!--[if lt IE 9]>
+    <script src="/js/html5.js"></script>
+    <![endif]-->
+    
+<script>
+    var _hmt = _hmt || [];
+    (function() {
+        var hm = document.createElement("script");
+        hm.src = "//hm.baidu.com/hm.js?fd459238242776d173cdc64918fb32f2";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+</head>
+
+<body class="home">
+    <!--[if lt IE 9]>
+    <div class="browsehappy">
+        当前网页 <strong>不支持</strong>
+        你正在使用的浏览器. 为了正常的访问, 请 <a href="http://browsehappy.com/">升级你的浏览器</a>.
+    </div>
+    <![endif]-->
+
+    <!-- 博客头部 -->
+    <header class="header">
+    <section class="container header-main">
+        <div class="logo">
+            <a href="/">
+                <div class="cover">
+                    <span class="name">ChuanQi&#39;s Blogs</span>
+                    <span class="description">null</span>
+                </div>
+            </a>
+        </div>
+        <div class="dropnav icon-paragraph-justify" id="JELON__btnDropNav"></div>
+        <ul class="menu hidden" id="JELON__menu">
+            
+            <li rel="/2017/12/31/mysql总结之Innodb索引/index.html" class="item ">
+                <a href="/" title="首页" class="icon-home">&nbsp;首页</a>
+            </li>
+            
+            <li rel="/2017/12/31/mysql总结之Innodb索引/index.html" class="item ">
+                <a href="/lab/" title="实验室" class="icon-lab">&nbsp;实验室</a>
+            </li>
+            
+            <li rel="/2017/12/31/mysql总结之Innodb索引/index.html" class="item ">
+                <a href="/about/" title="关于" class="icon-about">&nbsp;关于</a>
+            </li>
+            
+            <li rel="/2017/12/31/mysql总结之Innodb索引/index.html" class="item ">
+                <a href="/comment/" title="留言" class="icon-comment">&nbsp;留言</a>
+            </li>
+            
+        </ul>
+        <div class="profile clearfix">
+            <div class="feeds fl">
+                
+                
+                <p class="links">
+                    
+                        <a href="https://github.com/chuanqicc0430" target="_blank">Github</a>
+                        
+                    
+                </p>
+                <p class="sns">
+                    
+                        <a href="http://weibo.com/chuanqicc" class="sinaweibo" target="_blank"><b>■</b> 新浪微博</a>
+                    
+                    <a href="javascript: void(0);" class="wechat">
+                        <b>■</b>
+                        公众号
+                        <span class="popover">
+                            <img src="/img/wechat_mp.jpg" width="120" height="120" alt="我的微信订阅号">
+                            <i class="arrow"></i>
+                        </span>
+                    </a>
+                </p>
+                
+            </div>
+            <div class="avatar fr">
+                <img src="/img/jelon.jpg" alt="avatar" title="Jelon" >
+            </div>
+        </div>
+    </section>
+</header>
+
+
+    <!-- 博客正文 -->
+    <div class="container body clearfix">
+        <section class="content">
+            <div class="content-main widget">
+                <!-- 文章页 -->
+<!-- 文章 -->
+<article class="post article">
+    <header class="text-center">
+        <h3 class="post-title"><span>mysql总结之Innodb索引</span></h3>
+    </header>
+    <p class="post-meta text-center">
+        Jelon 发表于
+        <time datetime="2017-12-31T07:39:46.000Z">2017-12-31</time>
+    </p>
+    <div class="post-content">
+        <p>在上一篇<a href="http://cqzong.com/2017/12/30/mysql%E6%80%BB%E7%BB%93%EF%BC%88%E4%B8%80%EF%BC%89/">mysql总结（一）</a>中，提到过，Innodb索引是聚集索引，索引文件即是数据文件，每个表都有一个主键，即使用户没有显式的设置一个主键，mysql也会为这张表生成一个主键。那么，Innodb索引文件的数据结构是什么？数据查询时怎么通过索引查询的呢？</p>
+<h2 id="Innodb_u7D22_u5F15"><a href="#Innodb_u7D22_u5F15" class="headerlink" title="Innodb索引"></a>Innodb索引</h2><h3 id="Innodb_u7D22_u5F15_u539F_u7406"><a href="#Innodb_u7D22_u5F15_u539F_u7406" class="headerlink" title="Innodb索引原理"></a>Innodb索引原理</h3><p>InnoDB使用的是聚集索引，将主键组织到一棵B+树中，而行数据就储存在叶子节点上。B+树是指多路平衡搜索树，一棵典型的B+树结构如下图<br><img src="http://orvmy4v7l.bkt.clouddn.com/b_plus_tree" alt="B+树"><br>关于B+树和Innodb具体怎么构建实现B+树，在这里不详细说，可参考下面两个blog，有非常详细的介绍：<br><a href="http://www.cnblogs.com/tgycoder/p/5077017.html" target="_blank" rel="external">http://www.cnblogs.com/tgycoder/p/5077017.html</a><br><a href="http://blog.csdn.net/voidccc/article/details/40077329" target="_blank" rel="external">http://blog.csdn.net/voidccc/article/details/40077329</a><br>需要记住：</p>
+<ol>
+<li>B+树的非叶子节点即是索引节点，存的是顺序的主键索引区间。</li>
+<li>所有数据都是按键值的大小顺序存放在同一层的叶子节点中，各叶子节点用指针进行连接</li>
+<li>实际数据库B+树的高度一般在2-3，因此只需2-3次磁盘I/O就可以定位到需要的数据页，而实际情况中，B+树的非叶子节点一般直接预加载内存中，这样检索速度会更快。</li>
+</ol>
+<h4 id="u4E3B_u952E_u7D22_u5F15_u67E5_u8BE2"><a href="#u4E3B_u952E_u7D22_u5F15_u67E5_u8BE2" class="headerlink" title="主键索引查询"></a>主键索引查询</h4><p>通过主键检索数据就是一次B+树的遍历过程，时间复杂度为O(h)，h为B+树的高度。需要注意的地方是，B+树索引不能找到具体的一条记录，而是只能找到对应的数据页。把数据页从磁盘装入到内存中，再通过Page Directory（page的内部结构之一）进行二分查找，二分查找如果能找到行记录，则直接返回，如果找不到，还需要从链表中查找。</p>
+<h4 id="u8F85_u52A9_u7D22_u5F15_u67E5_u8BE2"><a href="#u8F85_u52A9_u7D22_u5F15_u67E5_u8BE2" class="headerlink" title="辅助索引查询"></a>辅助索引查询</h4><p>辅助索引会单独构建一棵辅助索引B+树，与主键索引树不同的是，辅助索引树的叶子节点不存行的全部数据，而是只存键值和对应的主键值，因此，辅助索引树的查询需要经过两次树的检索，举例，如下图表包含三个字段，id为主键，Name为辅助索引：<br><img src="http://orvmy4v7l.bkt.clouddn.com/non-clustered-index-search-table.jpg" alt="辅助索引查询表结构"><br>若对Name列进行条件搜索，则需要两个步骤：第一步在辅助索引B+树中检索Name，到达其叶子节点获取对应的主键。第二步使用主键在主索引B+树种再执行一次B+树检索操作，最终到达叶子节点即可获取整行数据。检索如下图所示：<br><img src="http://orvmy4v7l.bkt.clouddn.com/non-clustered-index-search.jpg" alt="辅助索引查询"></p>
+<h4 id="u8054_u5408_u7D22_u5F15_u67E5_u8BE2"><a href="#u8054_u5408_u7D22_u5F15_u67E5_u8BE2" class="headerlink" title="联合索引查询"></a>联合索引查询</h4><p>联合索引还是一个B+树，不同的是联合索引键值的数量不是1，而是大于等于2。假设两个字段a和b组成一个联合索引，如下图所示，每个节点上有两个键值，(1,1),(1,2),(2,1),(2,4),(3,1),(3,2), 数据按(a,b)顺序进行排列。<br><img src="http://orvmy4v7l.bkt.clouddn.com/union_index_b_plus_tree.png" alt="联合索引树"><br>因此，对于查询<strong>SELECT * FROM t WHERE a=1 AND b=2</strong>,显然可以使用(a,b)这个联合索引。对于单个a列查询<strong>SELECT * FROM t WHERE a=1</strong>也是可以使用(a,b)这个索引。但是对于b列的查询<strong>SELECT * FROM t WHERE b=2</strong>是用不到这颗B+树索引。可以看到叶节点上b的值为1、2、1、4、1、2.显然不是排序的，因此b列的查询使用不到(a,b)索引。这是一个比较重要的原则，即索引的<strong>最左前缀匹配原则</strong>，这在后面的索引使用和优化中会经常提到。</p>
+<h4 id="B+_u6811_u7D22_u5F15_u7684_u4F18_u52BF"><a href="#B+_u6811_u7D22_u5F15_u7684_u4F18_u52BF" class="headerlink" title="B+树索引的优势"></a>B+树索引的优势</h4><p><strong>为什么不用二叉查找树比如红黑树构建索引树？为什么使用B+树而不是B树？</strong><br>首先，评价一个数据结构作为索引的数据结构最重要的指标就是在查找过程中磁盘I/O操作次数的渐进复杂度。换句话说，索引的数据结构要尽量减少查找过程中磁盘I/O的存取次数。使用二叉查找树，比如红黑树构建索引树，树的高度会非常深，由于逻辑上很近的节点（父子）物理上可能很远，无法利用磁盘预读原理，会大大增加磁盘I/O次数。那么为什么不用B树？</p>
+<ol>
+<li>B+树的磁盘读写代价更低<br>B+树的内部结点并没有指向关键字具体信息的指针。因此其内部结点相对B 树更小。如果把所有同一内部结点的关键字存放在同一盘块中，那么盘块所能容纳的关键字数量也越多。一次性读入内存中的需要查找的关键字也就越多。相对来说IO读写次数也就降低了。<br>举个例子，假设磁盘中的一个盘块容纳16bytes，而一个关键字2bytes，一个关键字具体信息指针2bytes。一棵9阶B-tree(一个结点最多8个关键字)的内部结点需要2个盘快。而B+树内部结点只需要1个盘快(全部关键字都在叶结点的缘故？)。当需要把内部结点读入内存中的时候，B-树就比B+树多一次盘块查找时间(在磁盘中就是盘片旋转的时间)(B+树的内结点只有索引的作用，何来“把内部结点读入内存”…,对于B+树找到叶结点就可以，另外B+树可以顺序查找)。</li>
+<li>B+树的查询效率更加稳定<br>由于非终结点并不是最终指向文件内容的结点，而只是叶子结点中关键字的索引。所以任何关键字的查找必须走一条从根结点到叶子结点的路。所有关键字查询的路径长度相同，导致每一个数据的查询效率相当。</li>
+</ol>
+<h3 id="Innodb_u7D22_u5F15_u4F7F_u7528_u548C_u4F18_u5316_u7ECF_u9A8C"><a href="#Innodb_u7D22_u5F15_u4F7F_u7528_u548C_u4F18_u5316_u7ECF_u9A8C" class="headerlink" title="Innodb索引使用和优化经验"></a>Innodb索引使用和优化经验</h3><h4 id="u7D22_u5F15_u5EFA_u7ACB_u539F_u5219"><a href="#u7D22_u5F15_u5EFA_u7ACB_u539F_u5219" class="headerlink" title="索引建立原则"></a>索引建立原则</h4><p>在合理的表结构设计基础上的数据查询优化，很大程度上由索引的合理使用决定，因此，索引的正确使用非常重要，索引的建立应遵循以下原则：</p>
+<ol>
+<li>尽量使用主键索引，每个表都应该有一个业务无关的自增主键，在主键索引上的排序查找和范围查找的速度非常快。</li>
+<li>最左前缀匹配原则，非常重要的原则，mysql会一直向右匹配直到遇到范围查询(&gt;、&lt;、between、like)就停止匹配，比如a = 1 and b = 2 and c &gt; 3 and d = 4 如果建立(a,b,c,d)顺序的索引，d是用不到索引的，如果建立(a,b,d,c)的索引则都可以用到，a,b,d的顺序可以任意调整；</li>
+<li>=和in可以乱序，比如a = 1 and b = 2 and c = 3 建立(a,b,c)索引可以任意顺序，mysql的查询优化器会帮你优化成索引可以识别的形式；</li>
+<li>尽量选择区分度高的列作为索引,区分度的公式是count(distinct col)/count(*)，表示字段不重复的比例，比例越大我们扫描的记录数越少，唯一键的区分度是1，而一些状态、性别字段可能在大数据面前区分度就是0；</li>
+<li>索引字段应尽量小，不推荐在超大varchar或text字段上加索引;</li>
+<li>尽量的扩展索引，不要新建索引。比如表中已经有a的索引，现在要加(a,b)的索引，那么只需要修改原来的索引即可</li>
+<li>索引并非是越多越好，尤其对于写操作较为频繁的业务，索引的维护成本会比较高。</li>
+</ol>
+<p><strong>为什么要尽量使用一个业务无关的自增字段作为主键？</strong><br>Innodb索引是聚集索引，数据记录按主键顺序存在主索引树的叶子节点，如果使用自增主键，那么每次插入新纪录，就会顺序添加到当前索引节点的后续位置，当一页写满，则开辟新的一页，每次插入不需要移动数据，减少维护索引的成本。如果使用非自增主键，插入主键的值接近随机，因此每次插入都需要移动数据，索引维护成本大，且频繁的移动可能会造成大量的磁盘碎片。</p>
+<h4 id="SQL_u4F18_u5316"><a href="#SQL_u4F18_u5316" class="headerlink" title="SQL优化"></a>SQL优化</h4><p>这里的SQL优化是指对单条SQL的优化。</p>
+<ol>
+<li><p>使用explian分析执行计划，我的习惯是，写代码的时候，对于稍微复杂的SQL一定要用explain看一下，分析索引是否用到，是否有优化空间。explian执行计划主要关注这几项：</p>
+<ul>
+<li>type : 查询access的方式，表的连接类型<pre><code>index |  索引
+full  |  全表扫描
+ref   |  参照查询，也就是等值查询
+range |  范围查询
+</code></pre></li>
+<li>key:本次查询最终选择使用哪个索引，NULL为未使用索引</li>
+<li>key_len:选择的索引使用的前缀长度或者整个长度</li>
+<li>rows:查询逻辑扫描过的记录行数</li>
+<li>extra:包含不适合在其他列中显示但十分重要的额外信息：<pre><code>Using index     |  表示相应的select操作中使用了覆盖索引（Covering Index）【注：MySQL可以利用索引返回select列表中的字段，而不必根据索引再次读取数据文件  包含所有满足查询需要的数据的索引称为 覆盖索引】
+Using where     |  表示MySQL在存储引擎受到记录后进行“后过滤”（Post-filter）,如果查询未能使用索引，Using where的作用只是提醒我们MySQL将用where子句来过滤结果集
+Using temporary |  表示MySQL需要使用临时表来存储结果集，常见于排序和分组查询
+Using filesort  |  MySQL中无法利用索引完成的排序操作称为“文件排序”
+</code></pre></li>
+</ul>
+</li>
+<li><p>inner join代left join或right join，inner join性能比较快，等值连接隐式的使用inner join，如 SELECT A.id,A.name,B.id,B.name FROM A,B WHERE A.id = B.id;</p>
+</li>
+<li>子查询的性能比join性能慢，尽量用外连接来替换子查询。</li>
+<li>join查询应用小表驱动大表，即left join左边的表结果应尽量小，right join相反。</li>
+<li>索引列不能参与计算，不能用于函数计算，比如from_unixtime(create_time) = ‘2017-12-31’就不能使用到索引，原因很简单，B+树中存的都是数据表中的字段值，但进行检索时，需要把所有元素都应用函数才能比较，显然成本太大。所以语句应该优化成create_time = unix_timestamp(‘2017-12-31’);</li>
+<li>联合索引，只要有一列含有NULL值，这一列就不会用到索引，因此创建表时，字段不应默认为NULL。</li>
+<li>join查询，表关联的字段应是相同数据类型，否则用不到索引。</li>
+<li>order by的字段也应该满足最左前缀匹配原则，否则不会用到索引，例如a和b字段组成联合索引，以下order by语句可以用到索引：<ul>
+<li>order by a;</li>
+<li>a = 3 order by b;</li>
+<li>order by a,b;</li>
+<li>order by a desc ,b desc;</li>
+<li>a &gt; 5 order by a;</li>
+</ul>
+</li>
+<li>%通配符的使用，like ‘%xxx’或like ‘%xxx%’都用不到索引。</li>
+<li>尽量使用union all或者union代替OR，尽量使用union all而不是union。</li>
+<li>not in和&lt;&gt;都不会用到索引，not in可以用not exists代替，&lt;&gt;可以用or代替。</li>
+<li>limit查询在数据量很大时会有性能问题，如select * from t order by id limit 100000,10;可以优化成：select * from t where id in(select id from t limit 100000,1) limit 10;或者select * from t where id between 100000 and 100010;后者性能最好。</li>
+<li>用limit 1取得唯一行，有时要查询一张表时，如果只需要检索一行，可以使用limit 1来终止数据库引擎继续扫描整个表或者索引。</li>
+<li>避免使用select *，会增加磁盘操作时间，增加网络延迟，浪费流量。</li>
+<li>避免索引字段的值，因为索引数据列的顺序就是表记录的物理存储顺序，一旦该列值改变将导致整个表记录的顺序的调整，会耗费相当大的资源。</li>
+</ol>
+<h4 id="u5927_u6570_u91CF_u4E0B_u7684_u6570_u636E_u67E5_u8BE2_u4F18_u5316_u65B9_u6848"><a href="#u5927_u6570_u91CF_u4E0B_u7684_u6570_u636E_u67E5_u8BE2_u4F18_u5316_u65B9_u6848" class="headerlink" title="大数量下的数据查询优化方案"></a>大数量下的数据查询优化方案</h4><p>上一节的SQL优化针对的是具体的单条的SQL优化经验，对于大数据量下的数据查询优化，我们更应该从全局角度去思考这个问题，总结一下：</p>
+<ol>
+<li>表结构的适度冗余，合理设计表，适当的反第三范式，合理冗余字段，可以极大简化数据模型。</li>
+<li>优化SQL和索引；</li>
+<li>加缓存，如redis或memcached；</li>
+<li>表的垂直拆分，大系统拆成小系统，数据分离，使数据和查询分散；</li>
+<li>水平拆分，如分库分表设计；</li>
+</ol>
+<p>上面从简单到复杂，对应的实施成本也不断上升，因此，这个要跟随整个架构升级而进行。</p>
+
+    </div>
+    <p class="post-meta">
+        <span class="post-cat">分类：
+            <a class="cat-link" href="/categories/Blog/">Blog</a>
+        </span>
+        <span class="post-tags">
+            标签：
+            
+    
+        <a href="/tags/mysql/" title="mysql">mysql</a>
+    
+
+        </span>
+    </p>
+</article>
+<!-- 分享按钮 -->
+
+  <div class="article-share clearfix text-center">
+    <div class="share-area">
+      <span class="share-txt">分享到：</span>
+      <a href="javascript: window.open('http://service.weibo.com/share/share.php?url=' + encodeURIComponent(location.href) + '&title=' + document.title + '&language=zh_cn');" class="share-icon weibo"></a>
+      <a href="javascript: alert('请复制链接到微信并发送');" class="share-icon wechat"></a>
+      <a href="javascript: window.open('http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=' + encodeURIComponent(location.href) + '&title=' + document.title);" class="share-icon qqzone"></a>
+      <a href="javascript: window.open('http://connect.qq.com/widget/shareqq/index.html?url=' + encodeURIComponent(location.href) + '&desc=Jelon个人博客&title=' + document.title + '&callback=' + encodeURIComponent(location.href));" class="share-icon qq"></a>
+      <a href="javascript: window.open('http://shuo.douban.com/!service/share?href=' + encodeURIComponent(location.href) + '&name=' + document.title + '&text=' + document.title);" class="share-icon douban"></a>
+    </div>
+  </div>
+
+
+<!-- 上一篇/下一篇 -->
+
+<div class="article-nav clearfix">
+    
+    <span class="prev fl">
+        上一篇<br >
+        <a href="javascript: void(0);">没有上一篇了</a>
+    </span>
+    
+
+    
+    <span class="next fr">
+        下一篇<br >
+        <a href="/2017/12/30/mysql总结之Innodb引擎/">
+            
+                mysql总结（一）
+            
+        </a>
+    </span>
+    
+</div>
+
+<!-- 文章评论 -->
+
+  <script src="/js/comment.js"></script>
+  <div id="comments" class="comment">
+    <!--
+    <div class="sign-bar">
+      GitHub 已登录!
+      <span class="sign-link">登出</span>
+    </div>
+    <section class="box">
+      <div class="com-avatar"><img src="/img/jelon.jpg" alt="avatar"></div>
+      <div class="com-text">
+        <div class="main">
+          <textarea class="text-area-edited show" placeholder="欢迎评论！"></textarea>
+          <div class="text-area-preview"></div>
+        </div>
+        <div class="switch">
+          <div class="switch-item on">编辑</div>
+          <div class="switch-item">预览</div>
+        </div>
+        <div class="button">提交</div>
+      </div>
+    </section>
+    <section class="tips">注：评论支持 markdown 语法！</section>
+    <section class="list-wrap">
+      <ul class="list">
+        <li>
+          <div class="user-avatar">
+            <a href="/">
+              <img src="/img/jelon.jpg" alt="user-avatar">
+            </a>
+          </div>
+          <div class="user-comment">
+            <div class="user-comment-header">
+              <span class="post-name">张德龙</span>
+              <span class="post-time">2017年12月12日</span>
+              <span class="like liked">已赞</span>
+              <span class="like-num">2</span>
+            </div>
+            <div class="user-comment-body">333333</div>
+          </div>
+        </li>
+        <li>
+          <div class="user-avatar">
+            <a href="/">
+              <img src="/img/jelon.jpg" alt="user-avatar">
+            </a>
+          </div>
+          <div class="user-comment">
+            <div class="user-comment-header">
+              <span class="post-name">刘德华</span>
+              <span class="post-time">2017年12月12日</span>
+              <span class="like">点赞</span>
+              <span class="like-num">2</span>
+            </div>
+            <div class="user-comment-body">vvvvv</div>
+          </div>
+        </li>
+      </ul>
+      <div class="page-nav">
+        <a href="javascript: void(0);" class="item">1</a>
+        <a href="javascript: void(0);" class="item">2</a>
+        <a href="javascript: void(0);" class="item current">3</a>
+      </div>
+    </section>
+    -->
+  </div>
+  <script>
+  JELON.Comment({
+    container: 'comments',
+    label: 'mysql总结之Innodb索引' || '2017/12/31/mysql总结之Innodb索引/',
+    owner: 'chuanqicc0430',
+    repo: 'blog_comments',
+    clientId: '4058289f253c311109ad',
+    clientSecret: '31828d018d5a352c3f7e7ee9c0404541a09df744'
+  });
+  </script>
+
+
+            </div>
+
+        </section>
+        <!-- 侧栏部分 -->
+<aside class="sidebar">
+    <section class="widget">
+        <h3 class="widget-hd"><strong>文章分类</strong></h3>
+        <!-- 文章分类 -->
+<ul class="widget-bd">
+    
+    <li>
+        <a href="/categories/Blog/">Blog</a>
+        <span class="badge">(7)</span>
+    </li>
+    
+</ul>
+    </section>
+
+    
+    <section class="widget">
+        <h3 class="widget-hd"><strong>热门标签</strong></h3>
+        <!-- 文章标签 -->
+<div class="widget-bd tag-wrap">
+  
+    <a class="tag-item" href="/tags/2017/" title="2017">2017 (1)</a>
+  
+    <a class="tag-item" href="/tags/Dubbo/" title="Dubbo">Dubbo (1)</a>
+  
+    <a class="tag-item" href="/tags/微服务/" title="微服务">微服务 (1)</a>
+  
+    <a class="tag-item" href="/tags/mysql/" title="mysql">mysql (3)</a>
+  
+    <a class="tag-item" href="/tags/httpserver/" title="httpserver">httpserver (2)</a>
+  
+    <a class="tag-item" href="/tags/netty/" title="netty">netty (2)</a>
+  
+    <a class="tag-item" href="/tags/java/" title="java">java (2)</a>
+  
+</div>
+    </section>
+    
+
+    
+
+    
+</aside>
+<!-- / 侧栏部分 -->
+    </div>
+
+    <!-- 博客底部 -->
+    <footer class="footer">
+    &copy;
+    
+        2016-2018
+    
+
+    <a href="/">Jelon Loves You</a>
+</footer>
+<div class="back-to-top" id="JELON__backToTop" title="返回顶部">返回顶部</div>
+
+    <!--博客js脚本 -->
+    <!-- 这里放网站js脚本 -->
+<script src="/js/main.js"></script>
+</body>
+</html>
