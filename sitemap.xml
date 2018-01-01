@@ -2,6 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://cqzong.com/about/index.html</loc>
+    <lastmod>2018-01-01T03:43:44.075Z</lastmod>
+  </url>
+  
+  <url>
     <loc>http://cqzong.com/2017/12/31/mysql%E6%80%BB%E7%BB%93%E4%B9%8BInnodb%E7%B4%A2%E5%BC%95/</loc>
     <lastmod>2018-01-01T02:42:11.411Z</lastmod>
   </url>
@@ -49,11 +54,6 @@
   <url>
     <loc>http://cqzong.com/categories/index.html</loc>
     <lastmod>2016-02-03T06:51:25.000Z</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://cqzong.com/about/index.html</loc>
-    <lastmod>2016-02-03T06:32:11.000Z</lastmod>
   </url>
   
   <url>
