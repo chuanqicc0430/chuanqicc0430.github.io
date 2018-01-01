@@ -121,7 +121,7 @@
         <time datetime="2017-12-31T07:39:46.000Z">2017-12-31</time>
     </p>
     <div class="post-content">
-        <p>在上一篇<a href="http://cqzong.com/2017/12/30/mysql%E6%80%BB%E7%BB%93%EF%BC%88%E4%B8%80%EF%BC%89/">mysql总结之Innodb引擎</a>中，提到过，Innodb索引是聚集索引，索引文件即是数据文件，每个表都有一个主键，即使用户没有显式的设置一个主键，mysql也会为这张表生成一个主键。那么，Innodb索引文件的数据结构是什么？数据查询时怎么通过索引查询的呢？</p>
+        <p>在上一篇<a href="http://cqzong.com/2017/12/30/mysql%E6%80%BB%E7%BB%93%E4%B9%8BInnodb%E5%BC%95%E6%93%8E/">mysql总结之Innodb引擎</a>中，提到过，Innodb索引是聚集索引，索引文件即是数据文件，每个表都有一个主键，即使用户没有显式的设置一个主键，mysql也会为这张表生成一个主键。那么，Innodb索引文件的数据结构是什么？数据查询时怎么通过索引查询的呢？</p>
 <h2 id="Innodb_u7D22_u5F15"><a href="#Innodb_u7D22_u5F15" class="headerlink" title="Innodb索引"></a>Innodb索引</h2><h3 id="Innodb_u7D22_u5F15_u539F_u7406"><a href="#Innodb_u7D22_u5F15_u539F_u7406" class="headerlink" title="Innodb索引原理"></a>Innodb索引原理</h3><p>InnoDB使用的是聚集索引，将主键组织到一棵B+树中，而行数据就储存在叶子节点上。B+树是指多路平衡搜索树，一棵典型的B+树结构如下图<br><img src="http://orvmy4v7l.bkt.clouddn.com/b_plus_tree" alt="B+树"><br>关于B+树和Innodb具体怎么构建实现B+树，在这里不详细说，可参考下面两个blog，有非常详细的介绍：<br><a href="http://www.cnblogs.com/tgycoder/p/5077017.html" target="_blank" rel="external">http://www.cnblogs.com/tgycoder/p/5077017.html</a><br><a href="http://blog.csdn.net/voidccc/article/details/40077329" target="_blank" rel="external">http://blog.csdn.net/voidccc/article/details/40077329</a><br>需要记住：</p>
 <ol>
 <li>B+树的非叶子节点即是索引节点，存的是顺序的主键索引区间。</li>
