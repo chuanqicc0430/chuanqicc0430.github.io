@@ -181,7 +181,10 @@
 <h2 id="Innodb_u9501"><a href="#Innodb_u9501" class="headerlink" title="Innodb锁"></a>Innodb锁</h2><h3 id="InnoDB_u7684_u884C_u9501_u6A21_u5F0F_u53CA_u52A0_u9501_u65B9_u6CD5"><a href="#InnoDB_u7684_u884C_u9501_u6A21_u5F0F_u53CA_u52A0_u9501_u65B9_u6CD5" class="headerlink" title="InnoDB的行锁模式及加锁方法"></a>InnoDB的行锁模式及加锁方法</h3><p>InnoDB实现了以下两种类型的行锁。</p>
 <ul>
 <li>共享锁（S）：允许一个事务去读一行，阻止其他事务获得相同数据集的排他锁。</li>
-<li>排他锁（X)：允许获得排他锁的事务更新数据，阻止其他事务取得相同数据集的共享读锁和排他写锁。<br>另外innodb内部还有两种表锁：意向共享锁（IS）和意向排他锁（IX），这两种锁是InnoDB自动加的，不需用户干预。<br>对于UPDATE、DELETE和INSERT语句，InnoDB会自动给涉及数据集加排他锁（X)；对于普通SELECT语句，InnoDB不会加任何锁；事务可以通过以下语句显示给记录集加共享锁或排他锁。</li>
+<li>排他锁（X)：允许获得排他锁的事务更新数据，阻止其他事务取得相同数据集的共享读锁和排他写锁。</li>
+</ul>
+<p>另外innodb内部还有两种表锁：意向共享锁（IS）和意向排他锁（IX），这两种锁是InnoDB自动加的，不需用户干预。<br>对于UPDATE、DELETE和INSERT语句，InnoDB会自动给涉及数据集加排他锁（X)；对于普通SELECT语句，InnoDB不会加任何锁；事务可以通过以下语句显示给记录集加共享锁或排他锁。</p>
+<ul>
 <li>共享锁（S）：SELECT * FROM table_name WHERE … LOCK IN SHARE MODE。</li>
 <li>排他锁（X)：SELECT * FROM table_name WHERE … FOR UPDATE。</li>
 </ul>
@@ -189,8 +192,9 @@
 <h3 id="Next-Key_u9501"><a href="#Next-Key_u9501" class="headerlink" title="Next-Key锁"></a>Next-Key锁</h3><p>当用范围条件而不是相等条件检索数据，并请求共享或排他锁时，InnoDB会给符合条件的已有数据记录的索引项加锁；对于键值在条件范围内但并不存在的记录，叫做“间隙（GAP)”，InnoDB也会对这个“间隙”加锁，这种锁机制就是所谓的间隙锁（Next-Key锁）。<br>举例来说，假如emp表中只有101条记录，其empid的值分别是 1,2,…,100,101，下面的SQL：<br>Select * from  emp where empid &gt; 100 for update;<br>是一个范围条件的检索，InnoDB不仅会对符合条件的empid值为101的记录加锁，也会对empid大于101（这些记录并不存在）的“间隙”加锁。<br>很显然，在使用范围条件检索并锁定记录时，InnoDB这种加锁机制会阻塞符合条件范围内键值的并发插入，这往往会造成严重的锁等待。因此，在实际应用开发中，尤其是并发插入比较多的应用，要尽量优化业务逻辑，尽量使用相等条件来访问更新数据，避免使用范围条件。</p>
 <h3 id="u8868_u9501"><a href="#u8868_u9501" class="headerlink" title="表锁"></a>表锁</h3><ul>
 <li>事务需要更新大部分或全部数据，表又比较大，如果使用默认的行锁，不仅这个事务执行效率低，而且可能造成其他事务长时间锁等待和锁冲突；</li>
-<li>事务涉及多个表，比较复杂，很可能引起死锁，造成大量事务回滚。<br>以上两种情况可以考虑显式使用表锁：LOCK TABLE，注意使用LOCK TABLES要将AUTOCOMMIT设为0，否则MySQL不会给表加锁。</li>
+<li>事务涉及多个表，比较复杂，很可能引起死锁，造成大量事务回滚。</li>
 </ul>
+<p>以上两种情况可以考虑显式使用表锁：LOCK TABLE，注意使用LOCK TABLES要将AUTOCOMMIT设为0，否则MySQL不会给表加锁。</p>
 <h3 id="u6B7B_u9501"><a href="#u6B7B_u9501" class="headerlink" title="死锁"></a>死锁</h3><p>Innodb可能会发生死锁，比如两个事务都需要获得对方持有的排他锁才能继续完成事务，这种循环锁等待就是典型的死锁。发生死锁后，InnoDB一般都能自动检测到，并使一个事务释放锁并回退，另一个事务获得锁，继续完成事务。但在涉及外部锁，或涉及表锁的情况下，InnoDB并不能完全自动检测到死锁，这需要通过设置锁等待超时参数 innodb_lock_wait_timeout来解决。需要说明的是，这个参数并不是只用来解决死锁问题，在并发访问比较高的情况下，如果大量事务因无法立即获得所需的锁而挂起，会造成严重性能问题，甚至拖跨数据库。通过设置合适的锁等待超时阈值，可以避免这种情况发生。<br>通常来说，死锁都是应用设计的问题，通过调整业务流程、数据库对象设计、事务大小，以及访问数据库的SQL语句，绝大部分死锁都可以避免。避免死锁的常用方法如下：</p>
 <ol>
 <li>如果不同的应用并发存取多个表，应尽量约定以相同的顺序来访问表，这样可以大大降低产生死锁的机会；</li>
