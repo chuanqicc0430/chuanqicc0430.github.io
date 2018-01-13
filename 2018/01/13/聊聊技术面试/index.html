@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=11,IE=10,IE=9,IE=8" >
     <meta name="baidu-site-verification" content="dIcXMeY8Ya" />
     
-    <title>Mysql-多表查询优化 | ChuanQi&#39;s Blogs</title>
+    <title>聊聊面试 | ChuanQi&#39;s Blogs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" >
     <meta name="keywords" content="cqzong, 后端, 服务端, Java, 宗传奇, 后端开发, 架构" >
     <meta name="description" content="cqzong个人小站" >
@@ -56,19 +56,19 @@
         <div class="dropnav icon-paragraph-justify" id="JELON__btnDropNav"></div>
         <ul class="menu hidden" id="JELON__menu">
             
-            <li rel="/2016/02/16/Mysql-多表查询优化/index.html" class="item ">
+            <li rel="/2018/01/13/聊聊技术面试/index.html" class="item ">
                 <a href="/" title="首页" class="icon-home">&nbsp;首页</a>
             </li>
             
-            <li rel="/2016/02/16/Mysql-多表查询优化/index.html" class="item ">
+            <li rel="/2018/01/13/聊聊技术面试/index.html" class="item ">
                 <a href="/lab/" title="实验室" class="icon-lab">&nbsp;实验室</a>
             </li>
             
-            <li rel="/2016/02/16/Mysql-多表查询优化/index.html" class="item ">
+            <li rel="/2018/01/13/聊聊技术面试/index.html" class="item ">
                 <a href="/about/" title="关于" class="icon-about">&nbsp;关于</a>
             </li>
             
-            <li rel="/2016/02/16/Mysql-多表查询优化/index.html" class="item ">
+            <li rel="/2018/01/13/聊聊技术面试/index.html" class="item ">
                 <a href="/comment/" title="留言" class="icon-comment">&nbsp;留言</a>
             </li>
             
@@ -117,43 +117,30 @@
 <!-- 文章 -->
 <article class="post article">
     <header class="text-center">
-        <h3 class="post-title"><span>Mysql-多表查询优化</span></h3>
+        <h3 class="post-title"><span>聊聊面试</span></h3>
     </header>
     <p class="post-meta text-center">
         宗传奇 发表于
-        <time datetime="2016-02-16T03:48:32.000Z">2016-02-16</time>
+        <time datetime="2018-01-13T08:05:09.000Z">2018-01-13</time>
     </p>
     <div class="post-content">
-        <p>猴年开年第一篇，mark一下。</p>
-<p>关于mysql的多表查询优化，之前一直没有注意，最近写的一个自认为还OK的sql在生产环境中出现了问题，在此记录一下。</p>
-<h3 id="u6392_u67E5"><a href="#u6392_u67E5" class="headerlink" title="排查"></a>排查</h3><p>机器的CPU占用100%，查看业务日志，在执行问题sql的时候抛出异常：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java.sql.SQLException: An attempt by a client to checkout a Connection has timed out.</div></pre></td></tr></table></figure></p>
-<p>这个库连接肯定没问题，因为别的业务也在用这个库，所以定位这条sql写的有问题。<br>问题原因暂且放在一边，先把业务恢复了。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">show processlist;</div></pre></td></tr></table></figure></p>
-<p>列出所有正在运行的线程信息，发现这条问题sql卡在了 <strong>Sending data</strong> 状态：</p>
-<p><img src="http://cl.ly/1o2q2R2v0Y0D/Image%202016-02-16%20at%2010.56.45.png" alt="image1"></p>
-<p>直接执行 <strong>kill 线程号</strong>，杀掉这个线程，CPU立马就降下来了。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">kill</span> 256397;</div></pre></td></tr></table></figure></p>
-<p>值得注意的是，<strong>Sending data</strong> 状态官方解释是:正在处理Select查询的记录，同时正在把结果发送给客户端。如果卡在这个状态这个可能有两种情况：</p>
-<ol>
-<li>卡在了查询状态，也就是mysql正在收集数据；</li>
-<li>卡在了发送数据给客户端状态，这个可能是因为查询的数据量太大，堵塞了网络IO</li>
-</ol>
-<h3 id="u5206_u6790_26amp_3B_u89E3_u51B3"><a href="#u5206_u6790_26amp_3B_u89E3_u51B3" class="headerlink" title="分析&amp;解决"></a>分析&amp;解决</h3><p>这个sql出现问题的原因暂时还无解，因为 <strong>explain</strong> 之后的分析结果看，这个sql还是说得过去的，测试环境跑的也没问题，但是生产环境就有问题，有空向大拿请教一下。</p>
-<p><img src="http://cl.ly/2L0p3W070n2K/Image%202016-02-16%20at%2011.23.03.png" alt="image2"></p>
-<p>解决思路是使用子查询，尽可能的在子查询中缩小数据查询范围，但是优化后的sql <strong>explain</strong>之后看并没有改善太多，很奇怪：</p>
-<p><img src="http://cl.ly/2w2V2R2u0Q1j/Image%202016-02-16%20at%2011.27.44.png" alt="image3"></p>
-<p>以下是优化前和优化后的sql，请有经验的同学不吝赐教，感谢！</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">SELECT</div><div class="line">  fl.id         AS `fileLogId`,</div><div class="line">  fl.MD5        AS `smallPortrait`,</div><div class="line">  fl.userId     AS `userId`,</div><div class="line">  p.id          AS `portraitId`,</div><div class="line">  fl.updateTime AS `updateTime`</div><div class="line">FROM `CU_Log`.`UP_FileLog` fl,</div><div class="line">  `CU`.`UP_Portrait` p,</div><div class="line">  `CU`.`UP_User` u</div><div class="line">WHERE fl.userId = p.userId</div><div class="line">    AND fl.userId = u.userId</div><div class="line">    AND u.gender = 2</div><div class="line">    AND fl.`userId` &gt; 10000000</div><div class="line">    AND fl.`userId` &lt; 80000000</div><div class="line">    AND fl.`MD5` &lt;&gt; <span class="string">'94F46FECE6D8611C'</span></div><div class="line">    AND fl.fileType = 2</div><div class="line">    AND fl.actionType = 1</div><div class="line">    AND fl.MD5 = p.smallPortrait</div><div class="line">    AND p.`order` = (SELECT MIN(`order`) FROM `CU`.`UP_Portrait` WHERE userId = p.userId)</div><div class="line">    AND fl.`MD5` NOT IN(SELECT `md5` FROM `CU`.`CU_BlackFile`)</div><div class="line">    AND fl.`id` NOT IN(SELECT `fileLogId` FROM `CustomerSystem`.`CheckAvatarLog`)</div><div class="line">    AND p.id NOT IN(SELECT `portraitId` FROM `CustomerSystem`.`CheckAvatarLog`)</div><div class="line">GROUP BY p.id</div><div class="line">ORDER BY `updateTime` DESC</div><div class="line">LIMIT 8;</div></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">SELECT</div><div class="line">  f.fileLogId  AS `fileLogId`,</div><div class="line">  f.MD5        AS `smallPortrait`,</div><div class="line">  u.userId     AS `userId`,</div><div class="line">  f.portraitId AS `portraitId`,</div><div class="line">  f.updateTime AS `updateTime`</div><div class="line">FROM (SELECT</div><div class="line">        fl.`id`         AS `fileLogId`,</div><div class="line">        fl.`MD5`,</div><div class="line">        up.id           AS portraitId,</div><div class="line">        fl.`updateTime`,</div><div class="line">        fl.`userId`</div><div class="line">      FROM `CU_Log`.`UP_FileLog` fl,</div><div class="line">        `CU`.`UP_Portrait` up</div><div class="line">      WHERE fl.`userId` &gt; 10000000</div><div class="line">          AND fl.`userId` &lt; 80000000</div><div class="line">          AND fl.`actionType` = 1</div><div class="line">          AND fl.`fileType` = 2</div><div class="line">          AND fl.`MD5` &lt;&gt; <span class="string">'94F46FECE6D8611C'</span></div><div class="line">          AND fl.`userId` IN(SELECT u.`userId` FROM `CU`.`UP_User` u WHERE u.`userId` = fl.`userId` AND u.`gender` = 2)</div><div class="line">          AND fl.`MD5` NOT IN(SELECT bf.`md5` FROM `CU`.`CU_BlackFile` bf WHERE bf.`md5` = fl.`MD5`)</div><div class="line">          AND fl.userId = up.userId</div><div class="line">          AND fl.MD5 = up.smallPortrait</div><div class="line">          AND up.`order` = (SELECT MIN(`order`) FROM `CU`.`UP_Portrait` WHERE userId = up.userId)</div><div class="line">      GROUP BY fl.`userId`</div><div class="line">      HAVING `fileLogId` NOT IN(SELECT cl.`fileLogId` FROM `CustomerSystem`.`CheckAvatarLog` cl WHERE cl.`fileLogId` = `fileLogId`)</div><div class="line">      ORDER BY `updateTime` DESC</div><div class="line">      LIMIT 8 ) f,</div><div class="line">  `CU`.`UP_User` u</div><div class="line">WHERE f.`userId` = u.`userId`</div></pre></td></tr></table></figure>
+        <h2 id="u8BE5_u600E_u4E48_u9009_u62E9"><a href="#u8BE5_u600E_u4E48_u9009_u62E9" class="headerlink" title="该怎么选择"></a>该怎么选择</h2><p>选择比努力重要，这句话在面试以及选择offer中显得很重要，当你结束上一个工作后，一定要想清楚下一份工作要怎么选择，这和职业规划又息息相关了。比如，这次找工作我只认准必须得去成熟大公司去练级，而去年找工作我也是只奔着创业公司去的。<br>人在不同阶段会面对不同的选择，有时候很难一次想清未来几年或者长久自己的方向，尤其对于中国这样从小被父母和老师安排各种事情长大的人，当真正独立的时候，我们几乎完全不知道怎么去做选择。但是想清楚这个问题又很重要，所以我的做法是审视自己的不足，根据自己的不足去迈出下一步。当我想去创业公司的时候我认为我必须有个机会去全局掌控一个项目或者产品，而这个机会只有创业公司能给，当我想去成熟公司的时候我认为我必须要在技术深度和管理上充电，这也是成熟公司才能给的。</p>
+<h2 id="u88AB_u9762_u8BD5"><a href="#u88AB_u9762_u8BD5" class="headerlink" title="被面试"></a>被面试</h2><p>这次找工作我只参加了3次面试，美团、京东和滴滴，其实非常想去阿里，但是因为某些原因阿里的面试迟迟没有收到，比较遗憾。好在这三家公司对我来说已经足够有吸引力了。幸运的是，三家都收到了offer，最终选择了滴滴。</p>
+<h3 id="u51C6_u5907"><a href="#u51C6_u5907" class="headerlink" title="准备"></a>准备</h3><p>我算是从上家公司裸辞，实在是因为当时已经无法忍受了。现实证明，裸辞是非常不好的行为，会对你产生很大的压力。办完离职手续，我花了3天时间（周六、日、一）准备面试，对基本能考察的知识点做了一次系统的review，mysql总结系列文章就是在这几天的产物。<br>为什么要做准备？这就跟备考一样，考试考得知识点非常全面，但往往技术人员只能精通一到两项，当然不包括基础。知乎上有个问题：leetcode233题全部刷完是什么水平，能拿到什么水平的offer？有人回答：全部背完，没有进不了的公司。虽然不一定正确，但是也确实看出面试准备的重要性。这里我只列出我认为5年左右Java工程师准备面试应该准备的技术点：<br>项目介绍（重点是项目架构）、mysql（重点索引、事务、集群高可用）、redis（数据结构、使用场景、集群高可用、缓存相关）、zookeeper（使用场景、paxos算法、分布式锁）、Netty（线程模型、NIO、epoll、零拷贝、踩过的坑）、Dubbo（RPC、源码如远程暴露、服务注册、集群容错等）、Spring（Ioc、DI、AOP等）、Java并发（锁、volatile、ThreadLocal、线程池、并发容器如ConcurrentHashMap等）、Java内存模型、JVM相关、Java类加载机制、分布式微服务（做高可用高并发系统）、线上环境问题排查案例。<br>当然根据不同职业也有不同的要求，如搜索、大数据、网络通信如TCP/IP等等。</p>
+<h3 id="u9762_u8BD5_u6D41_u7A0B"><a href="#u9762_u8BD5_u6D41_u7A0B" class="headerlink" title="面试流程"></a>面试流程</h3><p>通过这次找工作的几次面试以及我之前面试别人的经历，我越发感觉面试流程的重要性，当然这是人事需要考虑的事，但是对于候选人来说，可能就决定了offer的选择倾向，毕竟找工作是一个双向选择的过程。<br>技术面试，当然首要目的是考察候选人的技术能力，2-3轮面试非常有必要，并且要由浅入深，根据职位岗位的不同逐渐深入。最后一轮面试我个人认为更重点要考察候选人的性格、是否能很快融入当前团队、之后的定位等，如果觉得合适，还应该向候选人展示当前公司或团队的实力、优势、愿景、展示领导nice的一面，这是吸引候选人很重要的一面。2-3轮技术面试对于技术的考察足矣，剩下一轮（不考虑人事面试）就是双方互相考察的一轮了。</p>
+<h3 id="u9762_u8BD5_u5230_u5E95_u8BE5_u8003_u5BDF_u4EC0_u4E48"><a href="#u9762_u8BD5_u5230_u5E95_u8BE5_u8003_u5BDF_u4EC0_u4E48" class="headerlink" title="面试到底该考察什么"></a>面试到底该考察什么</h3><p>面试流程很重要，面试准备很重要，那么面试的时候到底考察或者被考察什么？我一直认为，最应该关注的是能力，是学习能力、解决问题的能力、团队配合能力、总结能力，而不是这个人掌握了哪个知识点，具备什么样的经验。所以，对面试来说，过程可能比结果更重要，某一个问题可能得不出最终正确的答案，但解决问题的过程更重要。同时，对一个技术人员来说，我一直认为学习能力是技术人最重要的一个能力。对于面试提出的问题，一个很简单判断问题好坏的方式是看是否能很快google或者百度得到答案，比如，StringBuffer和StringBuilder的区别，Linux查看CPU占用的命令等等，这些都不是好问题。这种问题可以得出的结论是候选人掌握了这个知识点，但无法得出候选人具备什么样的能力。所以我更倾向于提一个较综合或者实际开发中碰到的问题案例，考察候选人的思路、经验和过往掌握的能力。</p>
+<p>最后，发个广告，滴滴出行，大平台，足够的发展空间，安卓、iOS、Java、产品、测试等等职位，可以联系我内推，chuanqicc0430@gmail.com 或者微信：chuanqicc0430。</p>
 
     </div>
     <p class="post-meta">
         <span class="post-cat">分类：
-            <a class="cat-link" href="/categories/mysql/">mysql</a>
+            <a class="cat-link" href="/categories/技术漫谈/">技术漫谈</a>
         </span>
         <span class="post-tags">
             标签：
             
     
-        <a href="/tags/mysql/" title="mysql">mysql</a>
+        <a href="/tags/面试/" title="面试">面试</a>
     
 
         </span>
@@ -179,18 +166,18 @@
     
     <span class="prev fl">
         上一篇<br >
-        <a href="/2016/02/19/Netty-Based-HttpServer-1/">
-            
-                基于Netty实现的httpserver实现一
-            
-        </a>
+        <a href="javascript: void(0);">没有上一篇了</a>
     </span>
     
 
     
     <span class="next fr">
         下一篇<br >
-        <a href="javascript: void(0);">没有下一篇了</a>
+        <a href="/2018/01/13/mysql总结之集群和高可用/">
+            
+                mysql总结之集群和高可用
+            
+        </a>
     </span>
     
 </div>
@@ -265,7 +252,7 @@
   <script>
   JELON.Comment({
     container: 'comments',
-    label: 'Mysql-多表查询优化' || '2016/02/16/Mysql-多表查询优化/',
+    label: '聊聊技术面试' || '2018/01/13/聊聊技术面试/',
     owner: 'chuanqicc0430',
     repo: 'blog_comments',
     clientId: '4058289f253c311109ad',

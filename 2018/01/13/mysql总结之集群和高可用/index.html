@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=11,IE=10,IE=9,IE=8" >
     <meta name="baidu-site-verification" content="dIcXMeY8Ya" />
     
-    <title>Mysql-多表查询优化 | ChuanQi&#39;s Blogs</title>
+    <title>mysql总结之集群和高可用 | ChuanQi&#39;s Blogs</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" >
     <meta name="keywords" content="cqzong, 后端, 服务端, Java, 宗传奇, 后端开发, 架构" >
     <meta name="description" content="cqzong个人小站" >
@@ -56,19 +56,19 @@
         <div class="dropnav icon-paragraph-justify" id="JELON__btnDropNav"></div>
         <ul class="menu hidden" id="JELON__menu">
             
-            <li rel="/2016/02/16/Mysql-多表查询优化/index.html" class="item ">
+            <li rel="/2018/01/13/mysql总结之集群和高可用/index.html" class="item ">
                 <a href="/" title="首页" class="icon-home">&nbsp;首页</a>
             </li>
             
-            <li rel="/2016/02/16/Mysql-多表查询优化/index.html" class="item ">
+            <li rel="/2018/01/13/mysql总结之集群和高可用/index.html" class="item ">
                 <a href="/lab/" title="实验室" class="icon-lab">&nbsp;实验室</a>
             </li>
             
-            <li rel="/2016/02/16/Mysql-多表查询优化/index.html" class="item ">
+            <li rel="/2018/01/13/mysql总结之集群和高可用/index.html" class="item ">
                 <a href="/about/" title="关于" class="icon-about">&nbsp;关于</a>
             </li>
             
-            <li rel="/2016/02/16/Mysql-多表查询优化/index.html" class="item ">
+            <li rel="/2018/01/13/mysql总结之集群和高可用/index.html" class="item ">
                 <a href="/comment/" title="留言" class="icon-comment">&nbsp;留言</a>
             </li>
             
@@ -117,33 +117,15 @@
 <!-- 文章 -->
 <article class="post article">
     <header class="text-center">
-        <h3 class="post-title"><span>Mysql-多表查询优化</span></h3>
+        <h3 class="post-title"><span>mysql总结之集群和高可用</span></h3>
     </header>
     <p class="post-meta text-center">
         宗传奇 发表于
-        <time datetime="2016-02-16T03:48:32.000Z">2016-02-16</time>
+        <time datetime="2018-01-13T06:57:00.981Z">2018-01-13</time>
     </p>
     <div class="post-content">
-        <p>猴年开年第一篇，mark一下。</p>
-<p>关于mysql的多表查询优化，之前一直没有注意，最近写的一个自认为还OK的sql在生产环境中出现了问题，在此记录一下。</p>
-<h3 id="u6392_u67E5"><a href="#u6392_u67E5" class="headerlink" title="排查"></a>排查</h3><p>机器的CPU占用100%，查看业务日志，在执行问题sql的时候抛出异常：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java.sql.SQLException: An attempt by a client to checkout a Connection has timed out.</div></pre></td></tr></table></figure></p>
-<p>这个库连接肯定没问题，因为别的业务也在用这个库，所以定位这条sql写的有问题。<br>问题原因暂且放在一边，先把业务恢复了。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">show processlist;</div></pre></td></tr></table></figure></p>
-<p>列出所有正在运行的线程信息，发现这条问题sql卡在了 <strong>Sending data</strong> 状态：</p>
-<p><img src="http://cl.ly/1o2q2R2v0Y0D/Image%202016-02-16%20at%2010.56.45.png" alt="image1"></p>
-<p>直接执行 <strong>kill 线程号</strong>，杀掉这个线程，CPU立马就降下来了。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">kill</span> 256397;</div></pre></td></tr></table></figure></p>
-<p>值得注意的是，<strong>Sending data</strong> 状态官方解释是:正在处理Select查询的记录，同时正在把结果发送给客户端。如果卡在这个状态这个可能有两种情况：</p>
-<ol>
-<li>卡在了查询状态，也就是mysql正在收集数据；</li>
-<li>卡在了发送数据给客户端状态，这个可能是因为查询的数据量太大，堵塞了网络IO</li>
-</ol>
-<h3 id="u5206_u6790_26amp_3B_u89E3_u51B3"><a href="#u5206_u6790_26amp_3B_u89E3_u51B3" class="headerlink" title="分析&amp;解决"></a>分析&amp;解决</h3><p>这个sql出现问题的原因暂时还无解，因为 <strong>explain</strong> 之后的分析结果看，这个sql还是说得过去的，测试环境跑的也没问题，但是生产环境就有问题，有空向大拿请教一下。</p>
-<p><img src="http://cl.ly/2L0p3W070n2K/Image%202016-02-16%20at%2011.23.03.png" alt="image2"></p>
-<p>解决思路是使用子查询，尽可能的在子查询中缩小数据查询范围，但是优化后的sql <strong>explain</strong>之后看并没有改善太多，很奇怪：</p>
-<p><img src="http://cl.ly/2w2V2R2u0Q1j/Image%202016-02-16%20at%2011.27.44.png" alt="image3"></p>
-<p>以下是优化前和优化后的sql，请有经验的同学不吝赐教，感谢！</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">SELECT</div><div class="line">  fl.id         AS `fileLogId`,</div><div class="line">  fl.MD5        AS `smallPortrait`,</div><div class="line">  fl.userId     AS `userId`,</div><div class="line">  p.id          AS `portraitId`,</div><div class="line">  fl.updateTime AS `updateTime`</div><div class="line">FROM `CU_Log`.`UP_FileLog` fl,</div><div class="line">  `CU`.`UP_Portrait` p,</div><div class="line">  `CU`.`UP_User` u</div><div class="line">WHERE fl.userId = p.userId</div><div class="line">    AND fl.userId = u.userId</div><div class="line">    AND u.gender = 2</div><div class="line">    AND fl.`userId` &gt; 10000000</div><div class="line">    AND fl.`userId` &lt; 80000000</div><div class="line">    AND fl.`MD5` &lt;&gt; <span class="string">'94F46FECE6D8611C'</span></div><div class="line">    AND fl.fileType = 2</div><div class="line">    AND fl.actionType = 1</div><div class="line">    AND fl.MD5 = p.smallPortrait</div><div class="line">    AND p.`order` = (SELECT MIN(`order`) FROM `CU`.`UP_Portrait` WHERE userId = p.userId)</div><div class="line">    AND fl.`MD5` NOT IN(SELECT `md5` FROM `CU`.`CU_BlackFile`)</div><div class="line">    AND fl.`id` NOT IN(SELECT `fileLogId` FROM `CustomerSystem`.`CheckAvatarLog`)</div><div class="line">    AND p.id NOT IN(SELECT `portraitId` FROM `CustomerSystem`.`CheckAvatarLog`)</div><div class="line">GROUP BY p.id</div><div class="line">ORDER BY `updateTime` DESC</div><div class="line">LIMIT 8;</div></pre></td></tr></table></figure>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">SELECT</div><div class="line">  f.fileLogId  AS `fileLogId`,</div><div class="line">  f.MD5        AS `smallPortrait`,</div><div class="line">  u.userId     AS `userId`,</div><div class="line">  f.portraitId AS `portraitId`,</div><div class="line">  f.updateTime AS `updateTime`</div><div class="line">FROM (SELECT</div><div class="line">        fl.`id`         AS `fileLogId`,</div><div class="line">        fl.`MD5`,</div><div class="line">        up.id           AS portraitId,</div><div class="line">        fl.`updateTime`,</div><div class="line">        fl.`userId`</div><div class="line">      FROM `CU_Log`.`UP_FileLog` fl,</div><div class="line">        `CU`.`UP_Portrait` up</div><div class="line">      WHERE fl.`userId` &gt; 10000000</div><div class="line">          AND fl.`userId` &lt; 80000000</div><div class="line">          AND fl.`actionType` = 1</div><div class="line">          AND fl.`fileType` = 2</div><div class="line">          AND fl.`MD5` &lt;&gt; <span class="string">'94F46FECE6D8611C'</span></div><div class="line">          AND fl.`userId` IN(SELECT u.`userId` FROM `CU`.`UP_User` u WHERE u.`userId` = fl.`userId` AND u.`gender` = 2)</div><div class="line">          AND fl.`MD5` NOT IN(SELECT bf.`md5` FROM `CU`.`CU_BlackFile` bf WHERE bf.`md5` = fl.`MD5`)</div><div class="line">          AND fl.userId = up.userId</div><div class="line">          AND fl.MD5 = up.smallPortrait</div><div class="line">          AND up.`order` = (SELECT MIN(`order`) FROM `CU`.`UP_Portrait` WHERE userId = up.userId)</div><div class="line">      GROUP BY fl.`userId`</div><div class="line">      HAVING `fileLogId` NOT IN(SELECT cl.`fileLogId` FROM `CustomerSystem`.`CheckAvatarLog` cl WHERE cl.`fileLogId` = `fileLogId`)</div><div class="line">      ORDER BY `updateTime` DESC</div><div class="line">      LIMIT 8 ) f,</div><div class="line">  `CU`.`UP_User` u</div><div class="line">WHERE f.`userId` = u.`userId`</div></pre></td></tr></table></figure>
-
+        <h2 id="mysql_u96C6_u7FA4_u65B9_u6848"><a href="#mysql_u96C6_u7FA4_u65B9_u6848" class="headerlink" title="mysql集群方案"></a>mysql集群方案</h2><h3 id="mysql_u96C6_u7FA4_u539F_u7406"><a href="#mysql_u96C6_u7FA4_u539F_u7406" class="headerlink" title="mysql集群原理"></a>mysql集群原理</h3><p>mysql集群是一个无共享的 （shared-nothing）、分布式节点架构的存储方案，其目的是提供集群容错性（高可用）和高性能。<br>数据在单个数据节点（也叫做存储节点） 上存储和复制，每个数据节点运行在独立的服务器上并维护数据的一份拷贝。在集群中还有管理节点，通过管理节点维持集群的运行，保证集群的整体可用性。数据更新时使用读取已提交隔离级别（read-commited isolation），来保证所有节点数据的一致性；使用两阶段提交机制（tow-phased commit）保证所有节点都有相同的数据（任何一个写操作失败，则更新失败）。<br>无共享的对等节点使得某个服务器上的更新操作在其他服务器上立即可见。传播更新使用一种复杂的通信机制，这一机制专门用来提供跨网络的高吞吐量。<br>该架构通过多个mysql服务器分配负载，从而最大程度的达到高性能，通过在不同的位置存储数据来保证高可用和冗余。mysql集群的典型部署是在某个网络中的不同机器上面安装集群的各个组建，因此mysql集群有称之为 网络数据库（network database  或者 NDB）。</p>
+<h3 id="u5E38_u89C1mysql_u96C6_u7FA4_u65B9_u6848"><a href="#u5E38_u89C1mysql_u96C6_u7FA4_u65B9_u6848" class="headerlink" title="常见mysql集群方案"></a>常见mysql集群方案</h3>
     </div>
     <p class="post-meta">
         <span class="post-cat">分类：
@@ -179,9 +161,9 @@
     
     <span class="prev fl">
         上一篇<br >
-        <a href="/2016/02/19/Netty-Based-HttpServer-1/">
+        <a href="/2018/01/13/聊聊技术面试/">
             
-                基于Netty实现的httpserver实现一
+                聊聊面试
             
         </a>
     </span>
@@ -190,7 +172,11 @@
     
     <span class="next fr">
         下一篇<br >
-        <a href="javascript: void(0);">没有下一篇了</a>
+        <a href="/2018/01/12/mysql总结之Innodb事务和锁/">
+            
+                mysql总结之Innodb事务和锁
+            
+        </a>
     </span>
     
 </div>
@@ -265,7 +251,7 @@
   <script>
   JELON.Comment({
     container: 'comments',
-    label: 'Mysql-多表查询优化' || '2016/02/16/Mysql-多表查询优化/',
+    label: 'mysql总结之集群和高可用' || '2018/01/13/mysql总结之集群和高可用/',
     owner: 'chuanqicc0430',
     repo: 'blog_comments',
     clientId: '4058289f253c311109ad',
